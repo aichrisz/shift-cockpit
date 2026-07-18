@@ -102,15 +102,34 @@ export const QUICK_CHIPS: QuickChip[] = [
   },
 ]
 
-/** Append phrase as a new line if it is not already the last non-empty line. */
+/** Normalize a phrase to a markdown bullet line (`- text`). */
+export function asBulletLine(phrase: string): string {
+  const trimmed = phrase.trim()
+  if (!trimmed) return ''
+  if (/^[-*•]\s+/.test(trimmed)) {
+    return trimmed.replace(/^•\s+/, '- ').replace(/^\*\s+/, '- ')
+  }
+  return `- ${trimmed}`
+}
+
+function stripBullet(line: string): string {
+  return line.trim().replace(/^[-*•]\s+/, '').trim()
+}
+
+/**
+ * Append phrase as a new markdown bullet line if it is not already
+ * the last non-empty line (bullet prefix ignored for duplicate check).
+ */
 export function appendChipLine(current: string, phrase: string): string {
-  const trimmedPhrase = phrase.trim()
-  if (!trimmedPhrase) return current
+  const bullet = asBulletLine(phrase)
+  if (!bullet) return current
 
-  const lines = current.replace(/\s+$/, '').split('\n')
-  const last = lines[lines.length - 1]?.trim() ?? ''
-  if (last === trimmedPhrase) return current.replace(/\s+$/, '')
+  const body = current.replace(/\s+$/, '')
+  if (!body.trim()) return bullet
 
-  if (!current.trim()) return trimmedPhrase
-  return `${current.replace(/\s+$/, '')}\n${trimmedPhrase}`
+  const lines = body.split('\n')
+  const last = lines[lines.length - 1] ?? ''
+  if (stripBullet(last) === stripBullet(bullet)) return body
+
+  return `${body}\n${bullet}`
 }
