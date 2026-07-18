@@ -1,7 +1,13 @@
-import { useMemo, useState } from 'react'
-import type { Lang, ShiftHandover } from '../types'
+import { useMemo, useRef, useState } from 'react'
+import type { AppData, Lang, PrintProfile, ShiftHandover } from '../types'
 import { t, tf } from '../i18n'
 import { countOlderThan } from '../lib/storage'
+import {
+  downloadBackupJson,
+  formatBackupAt,
+  parseBackupJson,
+  shouldNudgeBackup,
+} from '../lib/backup'
 import { ConfirmDialog } from './ConfirmDialog'
 
 interface SettingsProps {
@@ -9,9 +15,16 @@ interface SettingsProps {
   defaultShift: string
   compactUi: boolean
   haptics: boolean
+  printProfile: PrintProfile
+  lastBackupAt: string | null
+  /** Full app data for backup export. */
+  appData: AppData
   onDefaultShiftChange: (value: string) => void
   onCompactUiChange: (value: boolean) => void
   onHapticsChange: (value: boolean) => void
+  onPrintProfileChange: (value: PrintProfile) => void
+  onBackupExported: () => void
+  onImportBackup: (data: AppData) => void
   handovers: ShiftHandover[]
   onWipeOlder: (days: number) => number
 }
@@ -30,21 +43,33 @@ export function Settings({
   defaultShift,
   compactUi,
   haptics,
+  printProfile,
+  lastBackupAt,
+  appData,
   onDefaultShiftChange,
   onCompactUiChange,
   onHapticsChange,
+  onPrintProfileChange,
+  onBackupExported,
+  onImportBackup,
   handovers,
   onWipeOlder,
 }: SettingsProps) {
   const [days, setDays] = useState(DEFAULT_DAYS)
   const [status, setStatus] = useState<string | null>(null)
   const [wipeOpen, setWipeOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
+  const [pendingImport, setPendingImport] = useState<AppData | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const safeDays = clampDays(days)
   const olderCount = useMemo(
     () => countOlderThan(handovers, safeDays),
     [handovers, safeDays],
   )
+
+  const backupLabel = formatBackupAt(lastBackupAt, lang)
+  const showNudge = shouldNudgeBackup(lastBackupAt)
 
   function handleWipeClick() {
     const n = countOlderThan(handovers, safeDays)
@@ -61,6 +86,46 @@ export function Settings({
     setWipeOpen(false)
   }
 
+  function handleExportBackup() {
+    downloadBackupJson(appData)
+    onBackupExported()
+    setStatus(t(lang, 'backupDone'))
+  }
+
+  function handleImportPick(file: File | null) {
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      const text = typeof reader.result === 'string' ? reader.result : ''
+      const parsed = parseBackupJson(text)
+      if (!parsed) {
+        setStatus(t(lang, 'backupImportInvalid'))
+        return
+      }
+      setPendingImport(parsed)
+      setImportOpen(true)
+    }
+    reader.onerror = () => {
+      setStatus(t(lang, 'backupImportInvalid'))
+    }
+    reader.readAsText(file)
+  }
+
+  function confirmImport() {
+    if (!pendingImport) return
+    onImportBackup(pendingImport)
+    setPendingImport(null)
+    setImportOpen(false)
+    setStatus(t(lang, 'backupImportDone'))
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  function cancelImport() {
+    setPendingImport(null)
+    setImportOpen(false)
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
   return (
     <section className="settings-panel no-print" aria-labelledby="settings-heading">
       <ConfirmDialog
@@ -72,6 +137,17 @@ export function Settings({
         destructive
         onCancel={() => setWipeOpen(false)}
         onConfirm={confirmWipe}
+      />
+
+      <ConfirmDialog
+        lang={lang}
+        open={importOpen}
+        title={t(lang, 'backupImportTitle')}
+        body={t(lang, 'backupImportConfirm')}
+        confirmLabel={t(lang, 'backupImport')}
+        destructive
+        onCancel={cancelImport}
+        onConfirm={confirmImport}
       />
 
       <h2 id="settings-heading" className="panel-title">
@@ -116,6 +192,68 @@ export function Settings({
           </span>
         </span>
       </label>
+
+      <div className="settings-print-profile" role="group" aria-labelledby="print-profile-label">
+        <span id="print-profile-label" className="field-label">
+          {t(lang, 'printProfile')}
+        </span>
+        <p className="settings-hint">{t(lang, 'printProfileHint')}</p>
+        <div className="filter-row settings-profile-row">
+          <button
+            type="button"
+            className={`filter-chip${printProfile === 'normal' ? ' is-active' : ''}`}
+            aria-pressed={printProfile === 'normal'}
+            onClick={() => onPrintProfileChange('normal')}
+          >
+            {t(lang, 'printProfileNormal')}
+          </button>
+          <button
+            type="button"
+            className={`filter-chip${printProfile === 'compact' ? ' is-active' : ''}`}
+            aria-pressed={printProfile === 'compact'}
+            onClick={() => onPrintProfileChange('compact')}
+          >
+            {t(lang, 'printProfileCompact')}
+          </button>
+        </div>
+      </div>
+
+      <div className="settings-backup">
+        <h3 className="settings-subhead">{t(lang, 'backup')}</h3>
+        <p className="settings-hint" role="status">
+          {backupLabel
+            ? tf(lang, 'backupLast', { when: backupLabel })
+            : t(lang, 'backupNever')}
+        </p>
+        {showNudge && (
+          <p className="settings-nudge" role="status">
+            {t(lang, 'backupNudge')}
+          </p>
+        )}
+        <div className="settings-backup-actions">
+          <button type="button" className="btn btn-secondary" onClick={handleExportBackup}>
+            {t(lang, 'backupExport')}
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => fileRef.current?.click()}
+          >
+            {t(lang, 'backupImport')}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            className="visually-hidden"
+            tabIndex={-1}
+            onChange={(e) => {
+              const f = e.target.files?.[0] ?? null
+              handleImportPick(f)
+            }}
+          />
+        </div>
+      </div>
 
       <div className="settings-wipe">
         <h3 className="settings-subhead">{t(lang, 'wipeOlder')}</h3>

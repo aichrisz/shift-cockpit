@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { Lang, ShiftHandover } from '../types'
+import type { Lang, PrintProfile, ShiftHandover } from '../types'
 import { t } from '../i18n'
 import {
   copyToClipboard,
@@ -14,6 +14,7 @@ interface ExportProps {
   lang: Lang
   handover: ShiftHandover
   exportCompact: boolean
+  printProfile: PrintProfile
   haptics: boolean
   onExportCompactChange: (value: boolean) => void
   onBack: () => void
@@ -23,6 +24,7 @@ export function Export({
   lang,
   handover,
   exportCompact,
+  printProfile,
   haptics,
   onExportCompactChange,
   onBack,
@@ -143,7 +145,12 @@ export function Export({
         {markdown}
       </pre>
 
-      <PrintSheet lang={lang} handover={handover} compact={exportCompact} />
+      <PrintSheet
+        lang={lang}
+        handover={handover}
+        compact={exportCompact}
+        printProfile={printProfile}
+      />
     </div>
   )
 }

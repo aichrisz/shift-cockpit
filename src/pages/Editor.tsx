@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Lang, ShiftHandover } from '../types'
+import type { Lang, PrintProfile, ShiftHandover } from '../types'
 import { t } from '../i18n'
 import { Checklist } from '../components/Checklist'
 import { TipSplit } from '../components/TipSplit'
 import { QuickChips } from '../components/QuickChips'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { PrintSheet } from '../components/PrintSheet'
+import { FinishShiftWizard } from '../components/FinishShiftWizard'
 import { appendChipLine } from '../data/chips'
 import { appendRoomLine } from '../lib/roomHelper'
-import { checklistToMarkdown, copyToClipboard } from '../lib/exportMd'
+import {
+  checklistToMarkdown,
+  copyToClipboard,
+  handoverToMarkdown,
+} from '../lib/exportMd'
 import { applyHandoverReady } from '../lib/markReady'
 import { hapticPulse } from '../lib/haptics'
 
@@ -17,8 +22,11 @@ interface EditorProps {
   draft: ShiftHandover
   dirty: boolean
   pinned: boolean
+  /** Handover already in storage — pin + finish wizard allowed. */
+  canPin: boolean
   haptics: boolean
   exportCompact: boolean
+  printProfile: PrintProfile
   onChange: (next: ShiftHandover) => void
   onSave: () => void
   onExport: () => void
@@ -45,8 +53,10 @@ export function Editor({
   draft,
   dirty,
   pinned,
+  canPin,
   haptics,
   exportCompact,
+  printProfile,
   onChange,
   onSave,
   onExport,
@@ -57,7 +67,10 @@ export function Editor({
 }: EditorProps) {
   const [roomInput, setRoomInput] = useState('')
   const [copyFlash, setCopyFlash] = useState<string | null>(null)
+  /** Full status line (share fallback etc.) — not prefixed with “Copied:”. */
+  const [statusFlash, setStatusFlash] = useState<string | null>(null)
   const [leaveOpen, setLeaveOpen] = useState(false)
+  const [wizardOpen, setWizardOpen] = useState(false)
   const hasExistingTips =
     draft.tipTotal !== null ||
     draft.tipPeople !== null ||
@@ -106,11 +119,37 @@ export function Editor({
     }
   }
 
+  async function handleWizardShare() {
+    const markdown = handoverToMarkdown(draft, lang, { compact: exportCompact })
+    const title = `${draft.shiftLabel || t(lang, 'shiftLabel')} · ${draft.date}`
+    const canShare =
+      typeof navigator.share === 'function' &&
+      (typeof navigator.canShare !== 'function' ||
+        navigator.canShare({ title, text: markdown }))
+
+    if (canShare) {
+      try {
+        await navigator.share({ title, text: markdown })
+        hapticPulse(haptics)
+        return
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return
+      }
+    }
+
+    const ok = await copyToClipboard(markdown)
+    if (ok) {
+      hapticPulse(haptics)
+      setStatusFlash(t(lang, 'shareUnavailable'))
+      window.setTimeout(() => setStatusFlash(null), 2200)
+    }
+  }
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key !== 'Escape') return
+      if (wizardOpen) return // wizard handles Esc
       if (isTypingTarget(e.target)) {
-        // Spec: ignore shortcuts while typing in inputs.
         return
       }
       if (leaveOpen) {
@@ -127,7 +166,7 @@ export function Editor({
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [leaveOpen, dirty, onBack])
+  }, [leaveOpen, dirty, onBack, wizardOpen])
 
   return (
     <div className="editor-page">
@@ -144,6 +183,30 @@ export function Editor({
           onBack()
         }}
       />
+
+      {wizardOpen && (
+        <FinishShiftWizard
+          lang={lang}
+          draft={draft}
+          pinned={pinned}
+          canPin={canPin}
+          onMarkReady={handleMarkReady}
+          onPin={() => {
+            if (onPinToggle && !pinned) onPinToggle()
+          }}
+          onExport={() => {
+            setWizardOpen(false)
+            onExport()
+          }}
+          onShare={() => {
+            void handleWizardShare()
+          }}
+          onPrint={() => {
+            window.print()
+          }}
+          onClose={() => setWizardOpen(false)}
+        />
+      )}
 
       <div className="editor-toolbar no-print">
         <button type="button" className="btn btn-ghost" onClick={handleBack}>
@@ -178,11 +241,23 @@ export function Editor({
         <button type="button" className="btn btn-ready" onClick={handleMarkReady}>
           {t(lang, 'markReady')}
         </button>
+        <button
+          type="button"
+          className="btn btn-finish"
+          onClick={() => setWizardOpen(true)}
+        >
+          {t(lang, 'finishShift')}
+        </button>
       </div>
 
       {copyFlash && (
         <p className="toast-msg no-print" role="status">
           {t(lang, 'copied')}: {copyFlash}
+        </p>
+      )}
+      {statusFlash && (
+        <p className="toast-msg no-print" role="status">
+          {statusFlash}
         </p>
       )}
 
@@ -350,7 +425,12 @@ export function Editor({
         </section>
       </div>
 
-      <PrintSheet lang={lang} handover={draft} compact={exportCompact} />
+      <PrintSheet
+        lang={lang}
+        handover={draft}
+        compact={exportCompact}
+        printProfile={printProfile}
+      />
     </div>
   )
 }

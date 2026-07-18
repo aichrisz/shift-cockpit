@@ -1,4 +1,4 @@
-import type { Lang, ShiftHandover } from '../types'
+import type { Lang, PrintProfile, ShiftHandover } from '../types'
 import { t } from '../i18n'
 import {
   exportLabels,
@@ -10,7 +10,10 @@ import {
 interface PrintSheetProps {
   lang: Lang
   handover: ShiftHandover
+  /** Content compact (hide checklist/tips) — exportCompact setting. */
   compact?: boolean
+  /** Layout density for print media. Default normal. */
+  printProfile?: PrintProfile
   /** When true, show on screen as well (export preview). Default print-only. */
   visibleOnScreen?: boolean
 }
@@ -47,15 +50,20 @@ export function PrintSheet({
   lang,
   handover,
   compact = false,
+  printProfile = 'normal',
   visibleOnScreen = false,
 }: PrintSheetProps) {
   const L = exportLabels(lang, handover.lang)
   const tipLine = compact ? null : tipSummaryLine(handover, lang)
   const stamp = formatPrintStamp(lang)
+  const profile = printProfile === 'compact' ? 'compact' : 'normal'
 
   return (
     <article
-      className={`print-sheet${visibleOnScreen ? '' : ' print-only'}`}
+      className={`print-sheet${visibleOnScreen ? '' : ' print-only'}${
+        profile === 'compact' ? ' is-print-compact' : ''
+      }`}
+      data-print-profile={profile}
       aria-label={L.title}
     >
       <header className="print-sheet-header">

@@ -24,6 +24,8 @@ export interface ShiftHandover {
   templateId?: string
 }
 
+export type PrintProfile = 'normal' | 'compact'
+
 export interface Settings {
   lang: Lang
   defaultShift: string
@@ -37,6 +39,10 @@ export interface Settings {
   haptics?: boolean
   /** Compact export: open points + room + guest notes only. Default false. */
   exportCompact?: boolean
+  /** Print layout density for PrintSheet / @media print. Default normal. */
+  printProfile?: PrintProfile
+  /** ISO timestamp of last full-app JSON backup export, if any. */
+  lastBackupAt?: string | null
 }
 
 export interface AppData {

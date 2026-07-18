@@ -5,7 +5,7 @@ Local-first **hotel shift handover** notes for one trainee / front-desk shift.
 Phone-first checklist: open points, room notes, guest issues, Hotelfach-style checklist, tip split, Markdown export. Data stays in the browser (`localStorage`). No login, no backend.
 
 **UI languages:** DE · EN · ID  
-**Version:** 0.6.0
+**Version:** 0.7.0
 
 ## Quick start
 
@@ -27,6 +27,14 @@ Optional base path for project pages:
 ```bash
 VITE_BASE=/shift-cockpit/ npm run build
 ```
+
+## Features (v0.7)
+
+- **Finish shift wizard** — 3-step end-of-shift ritual: open checklist → pin active → export / share / print
+- **Incomplete filter** — list chip for handovers with open checklist items (AND with history + search)
+- **Continue last shift** — opens pinned handover, else most recently updated
+- **Print profile** — Settings normal / compact density on PrintSheet
+- **Full backup** — export AppData JSON (`shift-cockpit-YYYY-MM-DD.json`), optional import with confirm replace; soft nudge if never or older than 7 days
 
 ## Features (v0.6)
 

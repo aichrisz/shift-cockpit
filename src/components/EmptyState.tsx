@@ -1,7 +1,7 @@
 import type { Lang } from '../types'
 import { t } from '../i18n'
 
-export type EmptyKind = 'none' | 'filter' | 'search'
+export type EmptyKind = 'none' | 'filter' | 'search' | 'incomplete'
 
 interface EmptyStateProps {
   lang: Lang
@@ -10,6 +10,7 @@ interface EmptyStateProps {
   onLoadSample?: () => void
   onClearSearch?: () => void
   onShowAll?: () => void
+  onClearIncomplete?: () => void
 }
 
 function EmptyIllustration({ kind }: { kind: EmptyKind }) {
@@ -21,7 +22,7 @@ function EmptyIllustration({ kind }: { kind: EmptyKind }) {
       </div>
     )
   }
-  if (kind === 'filter') {
+  if (kind === 'filter' || kind === 'incomplete') {
     return (
       <div className="empty-illo empty-illo-filter" aria-hidden="true">
         <span className="empty-illo-bar" />
@@ -45,19 +46,24 @@ export function EmptyState({
   onLoadSample,
   onClearSearch,
   onShowAll,
+  onClearIncomplete,
 }: EmptyStateProps) {
   const titleKey =
     kind === 'search'
       ? 'emptySearchTitle'
-      : kind === 'filter'
-        ? 'emptyFilterTitle'
-        : 'emptyNoneTitle'
+      : kind === 'incomplete'
+        ? 'emptyIncompleteTitle'
+        : kind === 'filter'
+          ? 'emptyFilterTitle'
+          : 'emptyNoneTitle'
   const bodyKey =
     kind === 'search'
       ? 'emptySearchBody'
-      : kind === 'filter'
-        ? 'emptyFilterBody'
-        : 'emptyNoneBody'
+      : kind === 'incomplete'
+        ? 'emptyIncompleteBody'
+        : kind === 'filter'
+          ? 'emptyFilterBody'
+          : 'emptyNoneBody'
 
   return (
     <div className={`empty-state empty-state-${kind}`} role="status">
@@ -85,7 +91,12 @@ export function EmptyState({
             {t(lang, 'filterShowAll')}
           </button>
         )}
-        {(kind === 'filter' || kind === 'search') && onNew && (
+        {kind === 'incomplete' && onClearIncomplete && (
+          <button type="button" className="btn btn-primary" onClick={onClearIncomplete}>
+            {t(lang, 'clearIncompleteFilter')}
+          </button>
+        )}
+        {(kind === 'filter' || kind === 'search' || kind === 'incomplete') && onNew && (
           <button type="button" className="btn btn-ghost" onClick={onNew}>
             {t(lang, 'newShift')}
           </button>

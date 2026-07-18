@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Lang, ShiftHandover } from '../types'
-import { t } from '../i18n'
+import type { AppData, Lang, PrintProfile, ShiftHandover } from '../types'
+import { t, tf } from '../i18n'
 import { EmptyState } from '../components/EmptyState'
 import { Settings } from '../components/Settings'
 import { TemplatePicker, type CreateChoice } from '../components/TemplatePicker'
@@ -12,6 +12,15 @@ import {
   type HistoryFilter,
 } from '../lib/historyFilter'
 import { filterHandoversBySearch } from '../lib/listSearch'
+import {
+  filterIncompleteOnly,
+  resolveContinueLastId,
+} from '../lib/incomplete'
+import {
+  downloadBackupJson,
+  formatBackupAt,
+  shouldNudgeBackup,
+} from '../lib/backup'
 
 interface ListProps {
   lang: Lang
@@ -21,11 +30,17 @@ interface ListProps {
   pinnedId?: string | null
   compactUi: boolean
   haptics: boolean
+  printProfile: PrintProfile
+  lastBackupAt: string | null
+  appData: AppData
   /** True while first paint hydrates from storage. */
   booting?: boolean
   onDefaultShiftChange: (value: string) => void
   onCompactUiChange: (value: boolean) => void
   onHapticsChange: (value: boolean) => void
+  onPrintProfileChange: (value: PrintProfile) => void
+  onBackupExported: () => void
+  onImportBackup: (data: AppData) => void
   onNew: (choice: CreateChoice) => void
   onOpen: (id: string) => void
   onDelete: (id: string) => void
@@ -96,10 +111,16 @@ export function List({
   pinnedId,
   compactUi,
   haptics,
+  printProfile,
+  lastBackupAt,
+  appData,
   booting = false,
   onDefaultShiftChange,
   onCompactUiChange,
   onHapticsChange,
+  onPrintProfileChange,
+  onBackupExported,
+  onImportBackup,
   onNew,
   onOpen,
   onDelete,
@@ -112,14 +133,22 @@ export function List({
   const [filter, setFilter] = useState<HistoryFilter>(() =>
     defaultHistoryFilter(handovers),
   )
+  const [incompleteOnly, setIncompleteOnly] = useState(false)
   const [search, setSearch] = useState('')
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
+  const continueId = useMemo(
+    () => resolveContinueLastId(handovers, pinnedId),
+    [handovers, pinnedId],
+  )
+
   const filtered = useMemo(() => {
-    const byDate = filterHandoversByDate(handovers, filter)
-    return filterHandoversBySearch(byDate, search)
-  }, [handovers, filter, search])
+    let list = filterHandoversByDate(handovers, filter)
+    list = filterHandoversBySearch(list, search)
+    if (incompleteOnly) list = filterIncompleteOnly(list)
+    return list
+  }, [handovers, filter, search, incompleteOnly])
 
   const sorted = useMemo(() => {
     const list = [...filtered].sort(
@@ -186,6 +215,14 @@ export function List({
 
   const searchActive = search.trim().length > 0
   const filterActive = filter !== 'all'
+  const showBackupNudge = shouldNudgeBackup(lastBackupAt)
+  const backupWhen = formatBackupAt(lastBackupAt, lang)
+
+  function emptyKind(): 'search' | 'incomplete' | 'filter' {
+    if (searchActive) return 'search'
+    if (incompleteOnly) return 'incomplete'
+    return 'filter'
+  }
 
   return (
     <div className="list-page">
@@ -220,10 +257,40 @@ export function List({
             <button type="button" className="btn btn-primary" onClick={startNew}>
               {t(lang, 'newShift')}
             </button>
+            {continueId && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => onOpen(continueId)}
+              >
+                {t(lang, 'continueLast')}
+              </button>
+            )}
             <button type="button" className="btn btn-ghost" onClick={onLoadSample}>
               {t(lang, 'loadSample')}
             </button>
           </div>
+
+          {showBackupNudge && (
+            <div className="backup-nudge no-print" role="status">
+              <p className="backup-nudge-text">
+                {t(lang, 'backupNudge')}
+                {backupWhen
+                  ? ` · ${tf(lang, 'backupLast', { when: backupWhen })}`
+                  : ` · ${t(lang, 'backupNever')}`}
+              </p>
+              <button
+                type="button"
+                className="btn btn-ghost btn-compact"
+                onClick={() => {
+                  downloadBackupJson(appData)
+                  onBackupExported()
+                }}
+              >
+                {t(lang, 'backupExport')}
+              </button>
+            </div>
+          )}
 
           <label className="search-field no-print">
             <span className="visually-hidden">{t(lang, 'search')}</span>
@@ -261,12 +328,22 @@ export function List({
                 {t(lang, key)}
               </button>
             ))}
+            <button
+              type="button"
+              className={`filter-chip filter-chip-incomplete${
+                incompleteOnly ? ' is-active' : ''
+              }`}
+              aria-pressed={incompleteOnly}
+              onClick={() => setIncompleteOnly((v) => !v)}
+            >
+              {t(lang, 'filterIncomplete')}
+            </button>
           </div>
 
           {sorted.length === 0 ? (
             <EmptyState
               lang={lang}
-              kind={searchActive ? 'search' : 'filter'}
+              kind={emptyKind()}
               onNew={startNew}
               onClearSearch={
                 searchActive
@@ -276,10 +353,15 @@ export function List({
                     }
                   : undefined
               }
+              onClearIncomplete={
+                !searchActive && incompleteOnly
+                  ? () => setIncompleteOnly(false)
+                  : undefined
+              }
               onShowAll={
-                !searchActive && filterActive
+                !searchActive && !incompleteOnly && filterActive
                   ? () => setFilter('all')
-                  : !searchActive
+                  : !searchActive && !incompleteOnly
                     ? () => setFilter('all')
                     : undefined
               }
@@ -354,9 +436,15 @@ export function List({
         defaultShift={defaultShift}
         compactUi={compactUi}
         haptics={haptics}
+        printProfile={printProfile}
+        lastBackupAt={lastBackupAt}
+        appData={appData}
         onDefaultShiftChange={onDefaultShiftChange}
         onCompactUiChange={onCompactUiChange}
         onHapticsChange={onHapticsChange}
+        onPrintProfileChange={onPrintProfileChange}
+        onBackupExported={onBackupExported}
+        onImportBackup={onImportBackup}
         handovers={handovers}
         onWipeOlder={onWipeOlder}
       />

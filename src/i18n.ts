@@ -113,6 +113,41 @@ export type MessageKey =
   | 'emptySearchBody'
   | 'clearSearch'
   | 'printedAt'
+  | 'finishShift'
+  | 'finishWizardTitle'
+  | 'finishStepIncomplete'
+  | 'finishStepPin'
+  | 'finishStepDone'
+  | 'finishOpenCount'
+  | 'finishNoOpen'
+  | 'finishMarkAllReady'
+  | 'finishPinAsActive'
+  | 'finishAlreadyPinned'
+  | 'finishKeepPin'
+  | 'finishNext'
+  | 'finishBack'
+  | 'finishDone'
+  | 'finishExport'
+  | 'filterIncomplete'
+  | 'continueLast'
+  | 'printProfile'
+  | 'printProfileNormal'
+  | 'printProfileCompact'
+  | 'printProfileHint'
+  | 'backup'
+  | 'backupExport'
+  | 'backupImport'
+  | 'backupNever'
+  | 'backupLast'
+  | 'backupNudge'
+  | 'backupDone'
+  | 'backupImportTitle'
+  | 'backupImportConfirm'
+  | 'backupImportInvalid'
+  | 'backupImportDone'
+  | 'emptyIncompleteTitle'
+  | 'emptyIncompleteBody'
+  | 'clearIncompleteFilter'
 
 const de: Record<MessageKey, string> = {
   appTitle: 'Shift Cockpit',
@@ -227,6 +262,43 @@ const de: Record<MessageKey, string> = {
   emptySearchBody: 'Keine Übergabe passt zu dieser Suche. Suchbegriff löschen oder neu formulieren.',
   clearSearch: 'Suche löschen',
   printedAt: 'Gedruckt',
+  finishShift: 'Schicht beenden',
+  finishWizardTitle: 'Schicht-Abschluss',
+  finishStepIncomplete: 'Offene Punkte',
+  finishStepPin: 'Anheften',
+  finishStepDone: 'Export & Teilen',
+  finishOpenCount: '{n} offene Checklisten-Punkte',
+  finishNoOpen: 'Alle Checklisten-Punkte erledigt.',
+  finishMarkAllReady: 'Alles als bereit markieren',
+  finishPinAsActive: 'Als aktive Schicht anheften',
+  finishAlreadyPinned: 'Diese Übergabe ist bereits aktiv angeheftet.',
+  finishKeepPin: 'Aktuelle Anheftung behalten',
+  finishNext: 'Weiter',
+  finishBack: 'Zurück',
+  finishDone: 'Fertig',
+  finishExport: 'Zur Export-Ansicht',
+  filterIncomplete: 'Unvollständig',
+  continueLast: 'Letzte Schicht fortsetzen',
+  printProfile: 'Druckprofil',
+  printProfileNormal: 'Normal',
+  printProfileCompact: 'Kompakt',
+  printProfileHint: 'Normal: komfortable Ränder. Kompakt: dichter auf A4.',
+  backup: 'Backup',
+  backupExport: 'Backup JSON exportieren',
+  backupImport: 'Backup importieren',
+  backupNever: 'Noch kein Backup',
+  backupLast: 'Letztes Backup: {when}',
+  backupNudge: 'Lokales Backup empfohlen (länger als 7 Tage oder nie).',
+  backupDone: 'Backup gespeichert',
+  backupImportTitle: 'Backup wiederherstellen?',
+  backupImportConfirm:
+    'Alle aktuellen Übergaben und Einstellungen durch die Backup-Datei ersetzen? Nicht rückgängig.',
+  backupImportInvalid: 'Ungültige Backup-Datei',
+  backupImportDone: 'Backup wiederhergestellt',
+  emptyIncompleteTitle: 'Keine unvollständigen',
+  emptyIncompleteBody:
+    'Keine Übergabe mit offenen Checklisten-Punkten. Filter ausschalten oder alle anzeigen.',
+  clearIncompleteFilter: 'Filter aus',
 }
 
 const en: Record<MessageKey, string> = {
@@ -342,6 +414,43 @@ const en: Record<MessageKey, string> = {
   emptySearchBody: 'No handover matches this search. Clear the query or try different words.',
   clearSearch: 'Clear search',
   printedAt: 'Printed',
+  finishShift: 'Finish shift',
+  finishWizardTitle: 'End of shift',
+  finishStepIncomplete: 'Open items',
+  finishStepPin: 'Pin',
+  finishStepDone: 'Export & share',
+  finishOpenCount: '{n} open checklist item(s)',
+  finishNoOpen: 'All checklist items are done.',
+  finishMarkAllReady: 'Mark all ready',
+  finishPinAsActive: 'Pin as active shift',
+  finishAlreadyPinned: 'This handover is already pinned as active.',
+  finishKeepPin: 'Keep current pin',
+  finishNext: 'Next',
+  finishBack: 'Back',
+  finishDone: 'Done',
+  finishExport: 'Open export view',
+  filterIncomplete: 'Incomplete',
+  continueLast: 'Continue last shift',
+  printProfile: 'Print profile',
+  printProfileNormal: 'Normal',
+  printProfileCompact: 'Compact',
+  printProfileHint: 'Normal: comfortable margins. Compact: denser on A4.',
+  backup: 'Backup',
+  backupExport: 'Export backup JSON',
+  backupImport: 'Import backup',
+  backupNever: 'Never backed up',
+  backupLast: 'Last backup: {when}',
+  backupNudge: 'Local backup recommended (never or older than 7 days).',
+  backupDone: 'Backup saved',
+  backupImportTitle: 'Restore backup?',
+  backupImportConfirm:
+    'Replace all current handovers and settings with this backup file? This cannot be undone.',
+  backupImportInvalid: 'Invalid backup file',
+  backupImportDone: 'Backup restored',
+  emptyIncompleteTitle: 'No incomplete',
+  emptyIncompleteBody:
+    'No handover has open checklist items. Turn off the filter or show all.',
+  clearIncompleteFilter: 'Clear filter',
 }
 
 const id: Record<MessageKey, string> = {
@@ -457,6 +566,43 @@ const id: Record<MessageKey, string> = {
   emptySearchBody: 'Tidak ada yang cocok dengan pencarian. Hapus kata kunci atau coba lagi.',
   clearSearch: 'Hapus pencarian',
   printedAt: 'Dicetak',
+  finishShift: 'Akhiri shift',
+  finishWizardTitle: 'Akhir shift',
+  finishStepIncomplete: 'Item terbuka',
+  finishStepPin: 'Sematkan',
+  finishStepDone: 'Ekspor & bagikan',
+  finishOpenCount: '{n} item checklist terbuka',
+  finishNoOpen: 'Semua item checklist selesai.',
+  finishMarkAllReady: 'Tandai semua siap',
+  finishPinAsActive: 'Sematkan sebagai shift aktif',
+  finishAlreadyPinned: 'Serah terima ini sudah disematkan sebagai aktif.',
+  finishKeepPin: 'Pertahankan sematan saat ini',
+  finishNext: 'Lanjut',
+  finishBack: 'Kembali',
+  finishDone: 'Selesai',
+  finishExport: 'Buka tampilan ekspor',
+  filterIncomplete: 'Belum lengkap',
+  continueLast: 'Lanjutkan shift terakhir',
+  printProfile: 'Profil cetak',
+  printProfileNormal: 'Normal',
+  printProfileCompact: 'Ringkas',
+  printProfileHint: 'Normal: margin nyaman. Ringkas: lebih padat di A4.',
+  backup: 'Cadangan',
+  backupExport: 'Ekspor cadangan JSON',
+  backupImport: 'Impor cadangan',
+  backupNever: 'Belum pernah cadangan',
+  backupLast: 'Cadangan terakhir: {when}',
+  backupNudge: 'Cadangan lokal disarankan (belum pernah atau >7 hari).',
+  backupDone: 'Cadangan disimpan',
+  backupImportTitle: 'Pulihkan cadangan?',
+  backupImportConfirm:
+    'Ganti semua serah terima dan pengaturan dengan file cadangan ini? Tidak bisa dibatalkan.',
+  backupImportInvalid: 'File cadangan tidak valid',
+  backupImportDone: 'Cadangan dipulihkan',
+  emptyIncompleteTitle: 'Tidak ada yang belum lengkap',
+  emptyIncompleteBody:
+    'Tidak ada serah terima dengan checklist terbuka. Matikan filter atau tampilkan semua.',
+  clearIncompleteFilter: 'Matikan filter',
 }
 
 const catalogs: Record<Lang, Record<MessageKey, string>> = { de, en, id }

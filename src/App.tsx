@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { AppData, Lang, ShiftHandover, View } from './types'
+import type { AppData, Lang, PrintProfile, ShiftHandover, View } from './types'
 import type { CreateChoice } from './components/TemplatePicker'
 import type { TemplateId } from './data/templates'
 import { Header } from './components/Header'
@@ -160,6 +160,9 @@ export default function App() {
   const compactUi = data.settings.compactUi === true
   const haptics = data.settings.haptics !== false
   const exportCompact = data.settings.exportCompact === true
+  const printProfile: PrintProfile =
+    data.settings.printProfile === 'compact' ? 'compact' : 'normal'
+  const lastBackupAt = data.settings.lastBackupAt ?? null
 
   useEffect(() => {
     const root = document.documentElement
@@ -169,6 +172,10 @@ export default function App() {
       root.removeAttribute('data-compact')
     }
   }, [compactUi])
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-print-profile', printProfile)
+  }, [printProfile])
 
   const setBaseline = useCallback((h: ShiftHandover | null) => {
     baselineRef.current = h ? cloneDraft(h) : null
@@ -215,6 +222,30 @@ export default function App() {
       settings: { ...prev.settings, exportCompact: value },
     }))
   }, [])
+
+  const setPrintProfile = useCallback((value: PrintProfile) => {
+    setData((prev) => ({
+      ...prev,
+      settings: { ...prev.settings, printProfile: value },
+    }))
+  }, [])
+
+  const handleBackupExported = useCallback(() => {
+    setData((prev) => ({
+      ...prev,
+      settings: { ...prev.settings, lastBackupAt: new Date().toISOString() },
+    }))
+  }, [])
+
+  const handleImportBackup = useCallback((next: AppData) => {
+    setData(next)
+    setView({ name: 'list' })
+    setDraft(null)
+    baselineRef.current = null
+    setBaselineKey('')
+    clearUndoTimer()
+    setUndo(null)
+  }, [clearUndoTimer])
 
   const handlePinToggle = useCallback(
     (id: string) => {
@@ -454,10 +485,16 @@ export default function App() {
               pinnedId={pinnedId}
               compactUi={compactUi}
               haptics={haptics}
+              printProfile={printProfile}
+              lastBackupAt={lastBackupAt}
+              appData={data}
               booting={booting}
               onDefaultShiftChange={setDefaultShift}
               onCompactUiChange={setCompactUi}
               onHapticsChange={setHaptics}
+              onPrintProfileChange={setPrintProfile}
+              onBackupExported={handleBackupExported}
+              onImportBackup={handleImportBackup}
               onNew={handleNew}
               onOpen={(id) => openEditor(id)}
               onDelete={handleDelete}
@@ -474,8 +511,10 @@ export default function App() {
               draft={draft}
               dirty={dirty}
               pinned={pinnedId === draft.id}
+              canPin={data.handovers.some((h) => h.id === draft.id)}
               haptics={haptics}
               exportCompact={exportCompact}
+              printProfile={printProfile}
               onChange={setDraft}
               onSave={handleSave}
               onExport={handleExport}
@@ -496,6 +535,7 @@ export default function App() {
               lang={lang}
               handover={exportHandover}
               exportCompact={exportCompact}
+              printProfile={printProfile}
               haptics={haptics}
               onExportCompactChange={setExportCompact}
               onBack={() => {

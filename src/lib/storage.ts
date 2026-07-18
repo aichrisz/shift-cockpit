@@ -1,4 +1,4 @@
-import type { AppData, Settings, ShiftHandover } from '../types'
+import type { AppData, PrintProfile, Settings, ShiftHandover } from '../types'
 import { normalizeTemplateId } from '../data/templates'
 import { localDaysAgoIso, localIsoDate } from './dates'
 
@@ -11,6 +11,12 @@ const DEFAULT_SETTINGS: Settings = {
   compactUi: false,
   haptics: true,
   exportCompact: false,
+  printProfile: 'normal',
+  lastBackupAt: null,
+}
+
+function normalizePrintProfile(raw: unknown): PrintProfile {
+  return raw === 'compact' ? 'compact' : 'normal'
 }
 
 export function defaultAppData(): AppData {
@@ -70,57 +76,75 @@ function sanitizeHandover(raw: unknown): ShiftHandover | null {
   }
 }
 
+/**
+ * Sanitize unknown JSON into AppData (localStorage + backup import).
+ * Returns null only when structure is unusable (not an object).
+ */
+export function loadAppDataFromUnknown(parsed: unknown): AppData | null {
+  if (!isRecord(parsed)) return null
+
+  const settingsRaw = isRecord(parsed.settings) ? parsed.settings : {}
+  const lang =
+    settingsRaw.lang === 'en' || settingsRaw.lang === 'id' || settingsRaw.lang === 'de'
+      ? settingsRaw.lang
+      : DEFAULT_SETTINGS.lang
+
+  const handovers = Array.isArray(parsed.handovers)
+    ? parsed.handovers.map(sanitizeHandover).filter((h): h is ShiftHandover => h !== null)
+    : []
+
+  const lastTemplateId = normalizeTemplateId(settingsRaw.lastTemplateId)
+  const pinnedIdRaw = settingsRaw.pinnedId
+  const pinnedId =
+    typeof pinnedIdRaw === 'string'
+      ? pinnedIdRaw
+      : pinnedIdRaw === null
+        ? null
+        : undefined
+  // Drop pin if the handover no longer exists
+  const pinnedResolved =
+    pinnedId && handovers.some((h) => h.id === pinnedId) ? pinnedId : null
+
+  const compactUi = settingsRaw.compactUi === true
+  // Default true when key absent (first run / pre-v0.6 data).
+  const haptics = settingsRaw.haptics !== false
+  const exportCompact = settingsRaw.exportCompact === true
+  const printProfile = normalizePrintProfile(settingsRaw.printProfile)
+  const lastBackupRaw = settingsRaw.lastBackupAt
+  const lastBackupAt =
+    typeof lastBackupRaw === 'string'
+      ? lastBackupRaw
+      : lastBackupRaw === null
+        ? null
+        : null
+
+  return {
+    version: 1,
+    settings: {
+      lang,
+      defaultShift:
+        typeof settingsRaw.defaultShift === 'string'
+          ? settingsRaw.defaultShift
+          : DEFAULT_SETTINGS.defaultShift,
+      ...(lastTemplateId ? { lastTemplateId } : {}),
+      pinnedId: pinnedResolved,
+      compactUi,
+      haptics,
+      exportCompact,
+      printProfile,
+      lastBackupAt,
+    },
+    handovers,
+  }
+}
+
 export function loadAppData(): AppData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return defaultAppData()
 
     const parsed: unknown = JSON.parse(raw)
-    if (!isRecord(parsed)) return defaultAppData()
-
-    const settingsRaw = isRecord(parsed.settings) ? parsed.settings : {}
-    const lang =
-      settingsRaw.lang === 'en' || settingsRaw.lang === 'id' || settingsRaw.lang === 'de'
-        ? settingsRaw.lang
-        : DEFAULT_SETTINGS.lang
-
-    const handovers = Array.isArray(parsed.handovers)
-      ? parsed.handovers.map(sanitizeHandover).filter((h): h is ShiftHandover => h !== null)
-      : []
-
-    const lastTemplateId = normalizeTemplateId(settingsRaw.lastTemplateId)
-    const pinnedIdRaw = settingsRaw.pinnedId
-    const pinnedId =
-      typeof pinnedIdRaw === 'string'
-        ? pinnedIdRaw
-        : pinnedIdRaw === null
-          ? null
-          : undefined
-    // Drop pin if the handover no longer exists
-    const pinnedResolved =
-      pinnedId && handovers.some((h) => h.id === pinnedId) ? pinnedId : null
-
-    const compactUi = settingsRaw.compactUi === true
-    // Default true when key absent (first run / pre-v0.6 data).
-    const haptics = settingsRaw.haptics !== false
-    const exportCompact = settingsRaw.exportCompact === true
-
-    return {
-      version: 1,
-      settings: {
-        lang,
-        defaultShift:
-          typeof settingsRaw.defaultShift === 'string'
-            ? settingsRaw.defaultShift
-            : DEFAULT_SETTINGS.defaultShift,
-        ...(lastTemplateId ? { lastTemplateId } : {}),
-        pinnedId: pinnedResolved,
-        compactUi,
-        haptics,
-        exportCompact,
-      },
-      handovers,
-    }
+    return loadAppDataFromUnknown(parsed) ?? defaultAppData()
   } catch {
     return defaultAppData()
   }
