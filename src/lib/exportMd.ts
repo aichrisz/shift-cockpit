@@ -31,8 +31,8 @@ const LABELS: Record<Lang, MdLabels> = {
     title: 'Übergabe',
     updated: 'Aktualisiert',
     openPoints: 'Offene Punkte',
-    roomNotes: 'Zimmer',
-    guestNotes: 'Gäste',
+    roomNotes: 'Zimmer-Hinweise',
+    guestNotes: 'Beschwerden',
     checklist: 'Checkliste',
     tips: 'Trinkgeld',
     total: 'Gesamt',
@@ -46,7 +46,7 @@ const LABELS: Record<Lang, MdLabels> = {
     updated: 'Updated',
     openPoints: 'Open points',
     roomNotes: 'Room notes',
-    guestNotes: 'Guest notes',
+    guestNotes: 'Complaints',
     checklist: 'Checklist',
     tips: 'Tips',
     total: 'Total',
@@ -60,7 +60,7 @@ const LABELS: Record<Lang, MdLabels> = {
     updated: 'Diperbarui',
     openPoints: 'Poin terbuka',
     roomNotes: 'Catatan kamar',
-    guestNotes: 'Catatan tamu',
+    guestNotes: 'Keluhan',
     checklist: 'Checklist',
     tips: 'Tip',
     total: 'Total',
@@ -109,13 +109,14 @@ export function handoverToMarkdown(
     `## ${L.openPoints}`,
     section(h.openPoints),
     '',
-    `## ${L.roomNotes}`,
-    section(h.roomNotes),
-    '',
-    `## ${L.guestNotes}`,
-    section(h.guestNotes),
-    '',
   ]
+
+  if (h.roomNotes.trim()) {
+    parts.push(`## ${L.roomNotes}`, h.roomNotes.trim(), '')
+  }
+  if (h.guestNotes.trim()) {
+    parts.push(`## ${L.guestNotes}`, h.guestNotes.trim(), '')
+  }
 
   if (compact) {
     return parts.join('\n')

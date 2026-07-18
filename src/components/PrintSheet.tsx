@@ -88,15 +88,19 @@ export function PrintSheet({
         <NoteBody text={handover.openPoints} />
       </section>
 
-      <section className="print-section">
-        <h2 className="print-h2">{L.roomNotes}</h2>
-        <NoteBody text={handover.roomNotes} />
-      </section>
+      {handover.roomNotes.trim() ? (
+        <section className="print-section">
+          <h2 className="print-h2">{L.roomNotes}</h2>
+          <NoteBody text={handover.roomNotes} />
+        </section>
+      ) : null}
 
-      <section className="print-section">
-        <h2 className="print-h2">{L.guestNotes}</h2>
-        <NoteBody text={handover.guestNotes} />
-      </section>
+      {handover.guestNotes.trim() ? (
+        <section className="print-section">
+          <h2 className="print-h2">{L.guestNotes}</h2>
+          <NoteBody text={handover.guestNotes} />
+        </section>
+      ) : null}
 
       {!compact && (
         <section className="print-section">

@@ -76,6 +76,8 @@ export function Editor({
     draft.tipPeople !== null ||
     draft.tipNote.trim().length > 0
   const [tipsOpen, setTipsOpen] = useState(hasExistingTips)
+  const [roomOpen, setRoomOpen] = useState(draft.roomNotes.trim().length > 0)
+  const [guestOpen, setGuestOpen] = useState(draft.guestNotes.trim().length > 0)
   const roomFieldRef = useRef<HTMLInputElement>(null)
 
   function patch(partial: Partial<ShiftHandover>) {
@@ -314,80 +316,107 @@ export function Editor({
           />
         </div>
 
-        <div className="field">
-          <div className="field-label-row">
-            <span className="field-label" id="room-notes-label">
-              {t(lang, 'roomNotes')}
-            </span>
+        <section className="panel notes-optional no-print" aria-labelledby="room-notes-label">
+          <div className="panel-head">
+            <h2 id="room-notes-label" className="panel-title">
+              {t(lang, 'roomNotes')} <span className="optional-tag">({t(lang, 'optional')})</span>
+            </h2>
             <button
               type="button"
-              className="btn btn-ghost btn-compact no-print"
-              onClick={() => copySection(draft.roomNotes, 'copyRoom')}
+              className="btn btn-ghost"
+              aria-expanded={roomOpen}
+              onClick={() => setRoomOpen((o) => !o)}
             >
-              {t(lang, 'copy')}
+              {roomOpen ? t(lang, 'tipsHide') : t(lang, 'tipsShow')}
             </button>
           </div>
-          <div className="room-helper no-print" role="group" aria-label={t(lang, 'roomAdd')}>
-            <input
-              ref={roomFieldRef}
-              type="text"
-              className="input room-helper-input"
-              inputMode="numeric"
-              autoComplete="off"
-              placeholder={t(lang, 'roomNumberPh')}
-              value={roomInput}
-              onChange={(e) => setRoomInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handleRoomAdd()
-                }
-              }}
-              aria-labelledby="room-notes-label"
-            />
-            <button type="button" className="btn btn-secondary btn-compact" onClick={handleRoomAdd}>
-              {t(lang, 'roomAdd')}
-            </button>
-          </div>
-          <textarea
-            className="input textarea"
-            rows={3}
-            value={draft.roomNotes}
-            placeholder={t(lang, 'roomNotesPh')}
-            aria-labelledby="room-notes-label"
-            onChange={(e) => patch({ roomNotes: e.target.value })}
-          />
-        </div>
+          {roomOpen ? (
+            <div className="field optional-field-body">
+              <div className="field-label-row">
+                <span className="sr-only">{t(lang, 'roomNotes')}</span>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-compact no-print"
+                  onClick={() => copySection(draft.roomNotes, 'copyRoom')}
+                >
+                  {t(lang, 'copy')}
+                </button>
+              </div>
+              <div className="room-helper no-print" role="group" aria-label={t(lang, 'roomAdd')}>
+                <input
+                  ref={roomFieldRef}
+                  type="text"
+                  className="input room-helper-input"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder={t(lang, 'roomNumberPh')}
+                  value={roomInput}
+                  onChange={(e) => setRoomInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleRoomAdd()
+                    }
+                  }}
+                />
+                <button type="button" className="btn btn-secondary btn-compact" onClick={handleRoomAdd}>
+                  {t(lang, 'roomAdd')}
+                </button>
+              </div>
+              <textarea
+                className="input textarea"
+                rows={3}
+                value={draft.roomNotes}
+                placeholder={t(lang, 'roomNotesPh')}
+                onChange={(e) => patch({ roomNotes: e.target.value })}
+              />
+            </div>
+          ) : null}
+        </section>
 
-        <div className="field">
-          <div className="field-label-row">
-            <span className="field-label" id="guest-notes-label">
-              {t(lang, 'guestNotes')}
-            </span>
+        <section className="panel notes-optional no-print" aria-labelledby="guest-notes-label">
+          <div className="panel-head">
+            <h2 id="guest-notes-label" className="panel-title">
+              {t(lang, 'guestNotes')} <span className="optional-tag">({t(lang, 'optional')})</span>
+            </h2>
             <button
               type="button"
-              className="btn btn-ghost btn-compact no-print"
-              onClick={() => copySection(draft.guestNotes, 'copyGuest')}
+              className="btn btn-ghost"
+              aria-expanded={guestOpen}
+              onClick={() => setGuestOpen((o) => !o)}
             >
-              {t(lang, 'copy')}
+              {guestOpen ? t(lang, 'tipsHide') : t(lang, 'tipsShow')}
             </button>
           </div>
-          <QuickChips
-            lang={lang}
-            templateId={draft.templateId}
-            onPick={(phrase) =>
-              patch({ guestNotes: appendChipLine(draft.guestNotes, phrase) })
-            }
-          />
-          <textarea
-            className="input textarea"
-            rows={3}
-            value={draft.guestNotes}
-            placeholder={t(lang, 'guestNotesPh')}
-            aria-labelledby="guest-notes-label"
-            onChange={(e) => patch({ guestNotes: e.target.value })}
-          />
-        </div>
+          {guestOpen ? (
+            <div className="field optional-field-body">
+              <div className="field-label-row">
+                <span className="sr-only">{t(lang, 'guestNotes')}</span>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-compact no-print"
+                  onClick={() => copySection(draft.guestNotes, 'copyGuest')}
+                >
+                  {t(lang, 'copy')}
+                </button>
+              </div>
+              <QuickChips
+                lang={lang}
+                templateId={draft.templateId}
+                onPick={(phrase) =>
+                  patch({ guestNotes: appendChipLine(draft.guestNotes, phrase) })
+                }
+              />
+              <textarea
+                className="input textarea"
+                rows={3}
+                value={draft.guestNotes}
+                placeholder={t(lang, 'guestNotesPh')}
+                onChange={(e) => patch({ guestNotes: e.target.value })}
+              />
+            </div>
+          ) : null}
+        </section>
 
         <Checklist
           lang={lang}
