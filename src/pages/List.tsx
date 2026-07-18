@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Lang, ShiftHandover } from '../types'
 import { t } from '../i18n'
 import { EmptyState } from '../components/EmptyState'
@@ -20,10 +20,12 @@ interface ListProps {
   lastTemplateId?: string
   pinnedId?: string | null
   compactUi: boolean
+  haptics: boolean
   /** True while first paint hydrates from storage. */
   booting?: boolean
   onDefaultShiftChange: (value: string) => void
   onCompactUiChange: (value: boolean) => void
+  onHapticsChange: (value: boolean) => void
   onNew: (choice: CreateChoice) => void
   onOpen: (id: string) => void
   onDelete: (id: string) => void
@@ -43,6 +45,14 @@ function formatUpdated(iso: string, lang: Lang): string {
   } catch {
     return iso
   }
+}
+
+function isTypingTarget(el: EventTarget | null): boolean {
+  if (!(el instanceof HTMLElement)) return false
+  const tag = el.tagName
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true
+  if (el.isContentEditable) return true
+  return false
 }
 
 function ChecklistBadge({
@@ -85,9 +95,11 @@ export function List({
   lastTemplateId,
   pinnedId,
   compactUi,
+  haptics,
   booting = false,
   onDefaultShiftChange,
   onCompactUiChange,
+  onHapticsChange,
   onNew,
   onOpen,
   onDelete,
@@ -102,6 +114,7 @@ export function List({
   )
   const [search, setSearch] = useState('')
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const searchRef = useRef<HTMLInputElement>(null)
 
   const filtered = useMemo(() => {
     const byDate = filterHandoversByDate(handovers, filter)
@@ -128,6 +141,41 @@ export function List({
     onNew(choice)
   }
 
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      if (isTypingTarget(e.target)) return
+
+      if (e.key === 'Escape') {
+        if (deleteId !== null) {
+          e.preventDefault()
+          setDeleteId(null)
+          return
+        }
+        if (picking) {
+          e.preventDefault()
+          setPicking(false)
+        }
+        return
+      }
+
+      if (picking || deleteId !== null) return
+
+      if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault()
+        startNew()
+        return
+      }
+      if (e.key === '/') {
+        e.preventDefault()
+        searchRef.current?.focus()
+        searchRef.current?.select()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [picking, deleteId])
+
   if (booting) {
     return (
       <div className="list-page">
@@ -135,6 +183,9 @@ export function List({
       </div>
     )
   }
+
+  const searchActive = search.trim().length > 0
+  const filterActive = filter !== 'all'
 
   return (
     <div className="list-page">
@@ -162,7 +213,7 @@ export function List({
       />
 
       {handovers.length === 0 ? (
-        <EmptyState lang={lang} onNew={startNew} onLoadSample={onLoadSample} />
+        <EmptyState lang={lang} kind="none" onNew={startNew} onLoadSample={onLoadSample} />
       ) : (
         <>
           <div className="list-toolbar no-print">
@@ -177,6 +228,7 @@ export function List({
           <label className="search-field no-print">
             <span className="visually-hidden">{t(lang, 'search')}</span>
             <input
+              ref={searchRef}
               type="search"
               className="input search-input"
               value={search}
@@ -212,30 +264,26 @@ export function List({
           </div>
 
           {sorted.length === 0 ? (
-            <div className="filter-empty" role="status">
-              <p>
-                {search.trim()
-                  ? t(lang, 'searchEmpty')
-                  : t(lang, 'filterEmpty')}
-              </p>
-              {search.trim() ? (
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setSearch('')}
-                >
-                  {t(lang, 'filterShowAll')}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setFilter('all')}
-                >
-                  {t(lang, 'filterShowAll')}
-                </button>
-              )}
-            </div>
+            <EmptyState
+              lang={lang}
+              kind={searchActive ? 'search' : 'filter'}
+              onNew={startNew}
+              onClearSearch={
+                searchActive
+                  ? () => {
+                      setSearch('')
+                      searchRef.current?.focus()
+                    }
+                  : undefined
+              }
+              onShowAll={
+                !searchActive && filterActive
+                  ? () => setFilter('all')
+                  : !searchActive
+                    ? () => setFilter('all')
+                    : undefined
+              }
+            />
           ) : (
             <ul className="handover-list" role="list">
               {sorted.map((h) => {
@@ -305,8 +353,10 @@ export function List({
         lang={lang}
         defaultShift={defaultShift}
         compactUi={compactUi}
+        haptics={haptics}
         onDefaultShiftChange={onDefaultShiftChange}
         onCompactUiChange={onCompactUiChange}
+        onHapticsChange={onHapticsChange}
         handovers={handovers}
         onWipeOlder={onWipeOlder}
       />

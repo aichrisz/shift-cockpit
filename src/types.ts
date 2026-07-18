@@ -33,6 +33,10 @@ export interface Settings {
   pinnedId?: string | null
   /** Denser phone layout (padding/gaps). Default false. */
   compactUi?: boolean
+  /** Short vibrate on key actions when supported. Default true. */
+  haptics?: boolean
+  /** Compact export: open points + room + guest notes only. Default false. */
+  exportCompact?: boolean
 }
 
 export interface AppData {

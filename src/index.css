@@ -447,6 +447,99 @@ button {
   border: 1px solid rgba(196, 163, 90, 0.25);
 }
 
+/* CSS-only empty illustrations (no image deps) */
+.empty-illo {
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: 0 auto var(--space-5);
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.empty-illo-none {
+  border-radius: 12px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(196, 163, 90, 0.28);
+}
+
+.empty-illo-card {
+  width: 2.1rem;
+  height: 2.6rem;
+  border-radius: 4px;
+  border: 2px solid var(--accent);
+  background: rgba(196, 163, 90, 0.08);
+  box-shadow: 4px 4px 0 rgba(196, 163, 90, 0.2);
+}
+
+.empty-illo-plus {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #1a1510;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.15rem;
+  text-align: center;
+}
+
+.empty-illo-filter {
+  gap: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  padding: 0.85rem;
+  border-radius: 12px;
+  background: var(--bg-panel);
+  border: 1px dashed var(--border-strong);
+}
+
+.empty-illo-bar {
+  display: block;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--border-strong);
+  opacity: 0.85;
+}
+
+.empty-illo-bar.mid {
+  width: 72%;
+}
+
+.empty-illo-bar.short {
+  width: 48%;
+}
+
+.empty-illo-search {
+  border-radius: 50%;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+}
+
+.empty-illo-ring {
+  width: 1.65rem;
+  height: 1.65rem;
+  border: 2.5px solid var(--accent);
+  border-radius: 50%;
+  margin: -0.2rem 0.35rem 0 -0.2rem;
+}
+
+.empty-illo-handle {
+  position: absolute;
+  width: 0.85rem;
+  height: 2.5px;
+  background: var(--accent);
+  border-radius: 2px;
+  transform: rotate(45deg);
+  right: 1.05rem;
+  bottom: 1.2rem;
+}
+
 .empty-title {
   margin: 0 0 var(--space-2);
   font-size: 1.25rem;
@@ -475,6 +568,56 @@ button {
     max-width: none;
     justify-content: center;
   }
+}
+
+/* —— Undo toast —— */
+
+.undo-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: min(var(--max-w), calc(100vw - 2rem));
+  width: max-content;
+  min-width: min(18rem, calc(100vw - 2rem));
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  animation: view-enter 160ms ease;
+}
+
+.undo-toast-msg {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 0;
+}
+
+.undo-toast-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.export-compact-toggle {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* Print sheet — screen: hidden (print-only class); styles for print media */
+.print-sheet {
+  display: none;
 }
 
 /* —— List —— */
@@ -1172,32 +1315,56 @@ button {
   }
 }
 
-/* —— Print: handover sheet —— */
+/* —— Print: A4 handover sheet (Drucken) —— */
+
+@page {
+  size: A4;
+  margin: 14mm;
+}
 
 @media print {
   :root {
     color-scheme: light;
   }
 
+  html,
   body {
     background: #fff !important;
-    color: #000 !important;
+    color: #111 !important;
     font-size: 11pt;
-    line-height: 1.4;
+    line-height: 1.45;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    margin: 0;
   }
 
   .app-shell {
     max-width: none;
     margin: 0;
+    min-height: 0;
   }
 
+  .app-main {
+    padding: 0 !important;
+  }
+
+  .view-root {
+    animation: none !important;
+  }
+
+  /* Chrome: nav, actions, dialogs, toasts, filters, chips */
   .app-header,
   .no-print,
   .lang-toggle,
   .list-toolbar,
   .filter-row,
+  .search-field,
   .chip-row,
   .editor-toolbar,
+  .editor-screen,
   .handover-actions,
   .btn,
   .btn-danger-ghost,
@@ -1209,14 +1376,182 @@ button {
   .confirm-dialog-backdrop,
   .list-skeleton,
   .ready-row,
-  .toast-msg {
+  .toast-msg,
+  .undo-toast,
+  .export-compact-toggle,
+  .md-preview,
+  .list-page,
+  .handover-list {
     display: none !important;
   }
 
-  .print-only {
+  .print-only,
+  .print-sheet {
     display: block !important;
   }
 
+  .export-page,
+  .editor-page {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* —— Structured sheet —— */
+
+  .print-sheet {
+    color: #111;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    max-width: none;
+  }
+
+  .print-sheet-header {
+    margin: 0 0 1.1rem;
+    padding: 0 0 0.7rem;
+    border-bottom: 1.5pt solid #111;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .print-brand {
+    margin: 0 0 0.2rem;
+    font-size: 8.5pt;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #444;
+  }
+
+  .print-sheet-title {
+    margin: 0 0 0.35rem;
+    font-size: 18pt;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #000;
+    line-height: 1.2;
+  }
+
+  .print-sheet-shift {
+    margin: 0 0 0.25rem;
+    font-size: 12pt;
+    font-weight: 600;
+    color: #111;
+  }
+
+  .print-sep {
+    margin: 0 0.35em;
+    color: #666;
+  }
+
+  .print-sheet-updated {
+    margin: 0;
+    font-size: 9pt;
+    color: #444;
+  }
+
+  .print-section {
+    margin: 0 0 0.95rem;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-h2 {
+    margin: 0 0 0.35rem;
+    padding: 0 0 0.2rem;
+    font-size: 11pt;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #000;
+    border-bottom: 0.6pt solid #999;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .print-notes {
+    margin: 0;
+  }
+
+  .print-line,
+  .print-bullet {
+    margin: 0 0 0.2rem;
+    font-size: 10.5pt;
+    color: #111;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .print-bullet {
+    display: flex;
+    gap: 0.4em;
+    padding-left: 0.1rem;
+  }
+
+  .print-bullet-mark {
+    flex-shrink: 0;
+    color: #333;
+    font-weight: 600;
+  }
+
+  .print-note-gap {
+    height: 0.35rem;
+  }
+
+  .print-empty {
+    margin: 0;
+    font-size: 10.5pt;
+    color: #666;
+    font-style: italic;
+  }
+
+  .print-checklist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .print-checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    margin: 0 0 0.28rem;
+    font-size: 10.5pt;
+    line-height: 1.35;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-box {
+    flex-shrink: 0;
+    font-size: 12pt;
+    line-height: 1.2;
+    color: #000;
+    width: 1.1em;
+    text-align: center;
+  }
+
+  .print-check-label {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .print-checklist li.is-done .print-check-label {
+    color: #333;
+  }
+
+  .print-sheet-footer {
+    margin-top: 1.4rem;
+    padding-top: 0.55rem;
+    border-top: 0.6pt solid #999;
+    font-size: 8.5pt;
+    color: #444;
+    text-align: center;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Legacy heading block (if any) */
   .print-heading {
     margin-bottom: 1rem;
     border-bottom: 1pt solid #000;
@@ -1235,63 +1570,12 @@ button {
     color: #222;
   }
 
-  .app-main {
-    padding: 0;
-  }
-
-  .panel,
-  .field,
-  .tip-result,
-  .handover-card,
-  .md-preview {
-    background: #fff !important;
-    border-color: #ccc !important;
-    box-shadow: none !important;
-    color: #000 !important;
-  }
-
-  .field-label,
-  .panel-title,
-  .handover-title,
-  .check-row,
-  .tip-amount {
-    color: #000 !important;
-  }
-
-  .text-muted,
-  .handover-meta,
-  .panel-meta,
-  .check-row .is-done {
-    color: #333 !important;
-  }
-
-  .input,
-  .textarea {
-    border: 1pt solid #999 !important;
-    background: #fff !important;
-    color: #000 !important;
-    box-shadow: none !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .md-preview,
-  .handover-print-body {
-    max-height: none !important;
-    overflow: visible !important;
-    white-space: pre-wrap;
-    font-size: 10pt;
-    color: #000 !important;
-    border: none !important;
-    padding: 0 !important;
-  }
-
-  .app-title::before {
-    background: #000;
-  }
-
   a {
-    color: #000;
+    color: #000 !important;
     text-decoration: none;
+  }
+
+  a[href]::after {
+    content: none !important;
   }
 }

@@ -9,6 +9,8 @@ const DEFAULT_SETTINGS: Settings = {
   defaultShift: '',
   pinnedId: null,
   compactUi: false,
+  haptics: true,
+  exportCompact: false,
 }
 
 export function defaultAppData(): AppData {
@@ -99,6 +101,9 @@ export function loadAppData(): AppData {
       pinnedId && handovers.some((h) => h.id === pinnedId) ? pinnedId : null
 
     const compactUi = settingsRaw.compactUi === true
+    // Default true when key absent (first run / pre-v0.6 data).
+    const haptics = settingsRaw.haptics !== false
+    const exportCompact = settingsRaw.exportCompact === true
 
     return {
       version: 1,
@@ -111,6 +116,8 @@ export function loadAppData(): AppData {
         ...(lastTemplateId ? { lastTemplateId } : {}),
         pinnedId: pinnedResolved,
         compactUi,
+        haptics,
+        exportCompact,
       },
       handovers,
     }

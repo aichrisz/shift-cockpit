@@ -96,6 +96,23 @@ export type MessageKey =
   | 'confirmTitle'
   | 'wipeTitle'
   | 'leaveTitle'
+  | 'undo'
+  | 'dismiss'
+  | 'undoDeleted'
+  | 'undoWiped'
+  | 'undoMarkReady'
+  | 'haptics'
+  | 'hapticsHint'
+  | 'exportCompact'
+  | 'exportCompactHint'
+  | 'emptyNoneTitle'
+  | 'emptyNoneBody'
+  | 'emptyFilterTitle'
+  | 'emptyFilterBody'
+  | 'emptySearchTitle'
+  | 'emptySearchBody'
+  | 'clearSearch'
+  | 'printedAt'
 
 const de: Record<MessageKey, string> = {
   appTitle: 'Shift Cockpit',
@@ -193,6 +210,23 @@ const de: Record<MessageKey, string> = {
   confirmTitle: 'Bestätigen',
   wipeTitle: 'Ältere löschen',
   leaveTitle: 'Verlassen?',
+  undo: 'Rückgängig',
+  dismiss: 'Schließen',
+  undoDeleted: 'Übergabe gelöscht',
+  undoWiped: '{n} ältere gelöscht',
+  undoMarkReady: 'Als bereit markiert',
+  haptics: 'Haptik',
+  hapticsHint: 'Kurze Vibration bei Speichern, Anheften und Kopieren (wenn unterstützt).',
+  exportCompact: 'Kompakter Export',
+  exportCompactHint: 'Nur offene Punkte, Zimmer und Gäste — ohne Checkliste und Trinkgeld.',
+  emptyNoneTitle: 'Noch keine Übergaben',
+  emptyNoneBody: 'Lege deine erste Schicht-Übergabe an — offline, auf dem Handy.',
+  emptyFilterTitle: 'Nichts in diesem Zeitraum',
+  emptyFilterBody: 'In diesem Filter gibt es keine Übergaben. Zeige alle oder lege eine neue an.',
+  emptySearchTitle: 'Keine Treffer',
+  emptySearchBody: 'Keine Übergabe passt zu dieser Suche. Suchbegriff löschen oder neu formulieren.',
+  clearSearch: 'Suche löschen',
+  printedAt: 'Gedruckt',
 }
 
 const en: Record<MessageKey, string> = {
@@ -291,6 +325,23 @@ const en: Record<MessageKey, string> = {
   confirmTitle: 'Confirm',
   wipeTitle: 'Delete older',
   leaveTitle: 'Leave?',
+  undo: 'Undo',
+  dismiss: 'Dismiss',
+  undoDeleted: 'Handover deleted',
+  undoWiped: '{n} older deleted',
+  undoMarkReady: 'Marked ready',
+  haptics: 'Haptics',
+  hapticsHint: 'Short vibrate on save, pin, and copy when supported.',
+  exportCompact: 'Compact export',
+  exportCompactHint: 'Open points, rooms, and guests only — no checklist or tips.',
+  emptyNoneTitle: 'No handovers yet',
+  emptyNoneBody: 'Create your first shift handover — offline, phone-first.',
+  emptyFilterTitle: 'Nothing in this range',
+  emptyFilterBody: 'No handovers match this filter. Show all or create a new one.',
+  emptySearchTitle: 'No matches',
+  emptySearchBody: 'No handover matches this search. Clear the query or try different words.',
+  clearSearch: 'Clear search',
+  printedAt: 'Printed',
 }
 
 const id: Record<MessageKey, string> = {
@@ -389,6 +440,23 @@ const id: Record<MessageKey, string> = {
   confirmTitle: 'Konfirmasi',
   wipeTitle: 'Hapus yang lama',
   leaveTitle: 'Keluar?',
+  undo: 'Urungkan',
+  dismiss: 'Tutup',
+  undoDeleted: 'Serah terima dihapus',
+  undoWiped: '{n} yang lama dihapus',
+  undoMarkReady: 'Ditandai siap',
+  haptics: 'Haptik',
+  hapticsHint: 'Getar singkat saat simpan, semat, dan salin jika didukung.',
+  exportCompact: 'Ekspor ringkas',
+  exportCompactHint: 'Hanya poin terbuka, kamar, dan tamu — tanpa checklist atau tip.',
+  emptyNoneTitle: 'Belum ada serah terima',
+  emptyNoneBody: 'Buat serah terima shift pertama — offline, di HP.',
+  emptyFilterTitle: 'Kosong di rentang ini',
+  emptyFilterBody: 'Tidak ada serah terima di filter ini. Tampilkan semua atau buat baru.',
+  emptySearchTitle: 'Tidak ada hasil',
+  emptySearchBody: 'Tidak ada yang cocok dengan pencarian. Hapus kata kunci atau coba lagi.',
+  clearSearch: 'Hapus pencarian',
+  printedAt: 'Dicetak',
 }
 
 const catalogs: Record<Lang, Record<MessageKey, string>> = { de, en, id }

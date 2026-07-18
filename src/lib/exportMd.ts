@@ -79,11 +79,20 @@ export function checklistToMarkdown(h: ShiftHandover): string {
     .join('\n')
 }
 
+export interface ExportOptions {
+  /** Only open points, room notes, guest notes (no checklist / tips). */
+  compact?: boolean
+}
+
 /**
  * Full handover markdown. Section headers follow `style` (UI lang preferred).
  * Falls back to handover.lang, then English.
  */
-export function handoverToMarkdown(h: ShiftHandover, style?: Lang): string {
+export function handoverToMarkdown(
+  h: ShiftHandover,
+  style?: Lang,
+  options?: ExportOptions,
+): string {
   const lang: Lang =
     style === 'de' || style === 'en' || style === 'id'
       ? style
@@ -91,17 +100,7 @@ export function handoverToMarkdown(h: ShiftHandover, style?: Lang): string {
         ? h.lang
         : 'en'
   const L = LABELS[lang]
-
-  const checklistLines =
-    h.checklist.length === 0
-      ? `- ${L.none}`
-      : checklistToMarkdown(h)
-
-  const tipNote = h.tipNote.trim() ? `\n${L.note}: ${h.tipNote.trim()}` : ''
-  const hasTips =
-    h.tipTotal !== null ||
-    h.tipPeople !== null ||
-    h.tipNote.trim().length > 0
+  const compact = options?.compact === true
 
   const parts = [
     `# ${L.title} — ${h.date} — ${h.shiftLabel || '—'}`,
@@ -116,10 +115,24 @@ export function handoverToMarkdown(h: ShiftHandover, style?: Lang): string {
     `## ${L.guestNotes}`,
     section(h.guestNotes),
     '',
-    `## ${L.checklist}`,
-    checklistLines,
-    '',
   ]
+
+  if (compact) {
+    return parts.join('\n')
+  }
+
+  const checklistLines =
+    h.checklist.length === 0
+      ? `- ${L.none}`
+      : checklistToMarkdown(h)
+
+  const tipNote = h.tipNote.trim() ? `\n${L.note}: ${h.tipNote.trim()}` : ''
+  const hasTips =
+    h.tipTotal !== null ||
+    h.tipPeople !== null ||
+    h.tipNote.trim().length > 0
+
+  parts.push(`## ${L.checklist}`, checklistLines, '')
 
   if (hasTips) {
     const tipTotal = h.tipTotal === null ? '—' : String(h.tipTotal)
@@ -133,6 +146,55 @@ export function handoverToMarkdown(h: ShiftHandover, style?: Lang): string {
   }
 
   return parts.join('\n')
+}
+
+/** Labels used by the structured print sheet (same as markdown). */
+export function exportLabels(style?: Lang, handoverLang?: Lang): MdLabels {
+  const lang: Lang =
+    style === 'de' || style === 'en' || style === 'id'
+      ? style
+      : handoverLang === 'de' || handoverLang === 'en' || handoverLang === 'id'
+        ? handoverLang
+        : 'en'
+  return LABELS[lang]
+}
+
+export function formatExportUpdated(iso: string, lang: Lang): string {
+  try {
+    const locale = lang === 'de' ? 'de-DE' : lang === 'id' ? 'id-ID' : 'en-GB'
+    return new Date(iso).toLocaleString(locale, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    })
+  } catch {
+    return iso
+  }
+}
+
+export function formatPrintStamp(lang: Lang, d = new Date()): string {
+  try {
+    const locale = lang === 'de' ? 'de-DE' : lang === 'id' ? 'id-ID' : 'en-GB'
+    return d.toLocaleString(locale, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    })
+  } catch {
+    return d.toISOString()
+  }
+}
+
+export function tipSummaryLine(h: ShiftHandover, lang: Lang): string | null {
+  const hasTips =
+    h.tipTotal !== null ||
+    h.tipPeople !== null ||
+    h.tipNote.trim().length > 0
+  if (!hasTips) return null
+  const L = LABELS[lang]
+  const tipTotal = h.tipTotal === null ? '—' : String(h.tipTotal)
+  const tipPeople = h.tipPeople === null ? '—' : String(h.tipPeople)
+  const tipPer = perPerson(h.tipTotal, h.tipPeople)
+  const tipNote = h.tipNote.trim() ? ` · ${L.note}: ${h.tipNote.trim()}` : ''
+  return `${L.total}: ${tipTotal} / ${L.people}: ${tipPeople} → ${L.perPerson}: ${tipPer}${tipNote}`
 }
 
 export function exportFilename(h: ShiftHandover): string {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Lang, ShiftHandover } from '../types'
 import { t } from '../i18n'
 import {
@@ -7,17 +7,39 @@ import {
   exportFilename,
   handoverToMarkdown,
 } from '../lib/exportMd'
+import { hapticPulse } from '../lib/haptics'
+import { PrintSheet } from '../components/PrintSheet'
 
 interface ExportProps {
   lang: Lang
   handover: ShiftHandover
+  exportCompact: boolean
+  haptics: boolean
+  onExportCompactChange: (value: boolean) => void
   onBack: () => void
 }
 
-export function Export({ lang, handover, onBack }: ExportProps) {
-  const markdown = useMemo(() => handoverToMarkdown(handover, lang), [handover, lang])
+export function Export({
+  lang,
+  handover,
+  exportCompact,
+  haptics,
+  onExportCompactChange,
+  onBack,
+}: ExportProps) {
+  const markdown = useMemo(
+    () => handoverToMarkdown(handover, lang, { compact: exportCompact }),
+    [handover, lang, exportCompact],
+  )
   const [copied, setCopied] = useState(false)
   const [shareMsg, setShareMsg] = useState<string | null>(null)
+
+  useEffect(() => {
+    document.body.classList.add('print-preview-ready')
+    return () => {
+      document.body.classList.remove('print-preview-ready')
+    }
+  }, [])
 
   function flashCopied(msg?: string) {
     setCopied(true)
@@ -30,7 +52,10 @@ export function Export({ lang, handover, onBack }: ExportProps) {
 
   async function handleCopy() {
     const ok = await copyToClipboard(markdown)
-    if (ok) flashCopied()
+    if (ok) {
+      hapticPulse(haptics)
+      flashCopied()
+    }
   }
 
   async function handleShare() {
@@ -43,6 +68,7 @@ export function Export({ lang, handover, onBack }: ExportProps) {
     if (canShare) {
       try {
         await navigator.share({ title, text: markdown })
+        hapticPulse(haptics)
         return
       } catch (err) {
         // User cancelled share sheet — do not treat as error
@@ -51,7 +77,10 @@ export function Export({ lang, handover, onBack }: ExportProps) {
     }
 
     const ok = await copyToClipboard(markdown)
-    if (ok) flashCopied(t(lang, 'shareUnavailable'))
+    if (ok) {
+      hapticPulse(haptics)
+      flashCopied(t(lang, 'shareUnavailable'))
+    }
   }
 
   function handleDownload() {
@@ -63,7 +92,7 @@ export function Export({ lang, handover, onBack }: ExportProps) {
   }
 
   return (
-    <div className="export-page">
+    <div className={`export-page${exportCompact ? ' is-export-compact' : ''}`}>
       <div className="editor-toolbar no-print">
         <button type="button" className="btn btn-ghost" onClick={onBack}>
           {t(lang, 'back')}
@@ -84,6 +113,20 @@ export function Export({ lang, handover, onBack }: ExportProps) {
         </div>
       </div>
 
+      <label className="settings-toggle export-compact-toggle no-print">
+        <input
+          type="checkbox"
+          checked={exportCompact}
+          onChange={(e) => onExportCompactChange(e.target.checked)}
+        />
+        <span>
+          <span className="settings-toggle-label">{t(lang, 'exportCompact')}</span>
+          <span className="settings-hint settings-toggle-hint">
+            {t(lang, 'exportCompactHint')}
+          </span>
+        </span>
+      </label>
+
       {shareMsg && (
         <p className="toast-msg no-print" role="status">
           {shareMsg}
@@ -96,15 +139,11 @@ export function Export({ lang, handover, onBack }: ExportProps) {
       )}
 
       <h2 className="panel-title no-print">{t(lang, 'exportPreview')}</h2>
-      <div className="print-only print-heading">
-        <h1>{t(lang, 'appTitle')}</h1>
-        <p>
-          {handover.shiftLabel || t(lang, 'shiftLabel')} · {handover.date}
-        </p>
-      </div>
-      <pre className="md-preview handover-print-body" tabIndex={0}>
+      <pre className="md-preview no-print" tabIndex={0}>
         {markdown}
       </pre>
+
+      <PrintSheet lang={lang} handover={handover} compact={exportCompact} />
     </div>
   )
 }

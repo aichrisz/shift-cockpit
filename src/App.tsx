@@ -3,6 +3,7 @@ import type { AppData, Lang, ShiftHandover, View } from './types'
 import type { CreateChoice } from './components/TemplatePicker'
 import type { TemplateId } from './data/templates'
 import { Header } from './components/Header'
+import { UndoToast } from './components/UndoToast'
 import { List } from './pages/List'
 import { Editor } from './pages/Editor'
 import { Export } from './pages/Export'
@@ -13,6 +14,23 @@ import { createSampleHandover } from './data/sample'
 import { createTemplateChecklist, templateShiftLabel } from './data/templates'
 import { localIsoDate } from './lib/dates'
 import { handoverSnapshot, isHandoverDirty } from './lib/dirty'
+import { hapticPulse } from './lib/haptics'
+import { t, tf } from './i18n'
+
+const UNDO_MS = 5000
+
+type UndoState =
+  | {
+      kind: 'handovers'
+      message: string
+      handovers: ShiftHandover[]
+      pinnedId: string | null | undefined
+    }
+  | {
+      kind: 'markReady'
+      message: string
+      previous: ShiftHandover
+    }
 
 function todayIsoDate(): string {
   return localIsoDate()
@@ -83,6 +101,10 @@ function cloneDraft(h: ShiftHandover): ShiftHandover {
   return { ...h, checklist: h.checklist.map((c) => ({ ...c })) }
 }
 
+function deepCloneHandovers(list: ShiftHandover[]): ShiftHandover[] {
+  return list.map((h) => cloneDraft(h))
+}
+
 export default function App() {
   const [data, setData] = useState<AppData>(() => loadAppData())
   const [view, setView] = useState<View>({ name: 'list' })
@@ -92,6 +114,8 @@ export default function App() {
   const [baselineKey, setBaselineKey] = useState('')
   /** Brief boot so list can show skeleton for one paint after hydrate. */
   const [booting, setBooting] = useState(true)
+  const [undo, setUndo] = useState<UndoState | null>(null)
+  const undoTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
     saveAppData(data)
@@ -105,9 +129,37 @@ export default function App() {
     return () => window.cancelAnimationFrame(id)
   }, [])
 
+  const clearUndoTimer = useCallback(() => {
+    if (undoTimerRef.current != null) {
+      window.clearTimeout(undoTimerRef.current)
+      undoTimerRef.current = null
+    }
+  }, [])
+
+  const dismissUndo = useCallback(() => {
+    clearUndoTimer()
+    setUndo(null)
+  }, [clearUndoTimer])
+
+  const offerUndo = useCallback(
+    (next: UndoState) => {
+      clearUndoTimer()
+      setUndo(next)
+      undoTimerRef.current = window.setTimeout(() => {
+        setUndo(null)
+        undoTimerRef.current = null
+      }, UNDO_MS)
+    },
+    [clearUndoTimer],
+  )
+
+  useEffect(() => () => clearUndoTimer(), [clearUndoTimer])
+
   const lang = data.settings.lang
   const pinnedId = data.settings.pinnedId ?? null
   const compactUi = data.settings.compactUi === true
+  const haptics = data.settings.haptics !== false
+  const exportCompact = data.settings.exportCompact === true
 
   useEffect(() => {
     const root = document.documentElement
@@ -150,15 +202,33 @@ export default function App() {
     }))
   }, [])
 
-  const handlePinToggle = useCallback((id: string) => {
+  const setHaptics = useCallback((value: boolean) => {
     setData((prev) => ({
       ...prev,
-      settings: {
-        ...prev.settings,
-        pinnedId: prev.settings.pinnedId === id ? null : id,
-      },
+      settings: { ...prev.settings, haptics: value },
     }))
   }, [])
+
+  const setExportCompact = useCallback((value: boolean) => {
+    setData((prev) => ({
+      ...prev,
+      settings: { ...prev.settings, exportCompact: value },
+    }))
+  }, [])
+
+  const handlePinToggle = useCallback(
+    (id: string) => {
+      hapticPulse(haptics)
+      setData((prev) => ({
+        ...prev,
+        settings: {
+          ...prev.settings,
+          pinnedId: prev.settings.pinnedId === id ? null : id,
+        },
+      }))
+    },
+    [haptics],
+  )
 
   const openEditor = useCallback(
     (id: string) => {
@@ -213,22 +283,34 @@ export default function App() {
     setDraft(saved)
     setBaseline(saved)
     setView({ name: 'editor', id: saved.id })
-  }, [draft, lang, setBaseline])
+    hapticPulse(haptics)
+  }, [draft, lang, setBaseline, haptics])
 
-  const handleDelete = useCallback((id: string) => {
-    setData((prev) => ({
-      ...prev,
-      handovers: prev.handovers.filter((h) => h.id !== id),
-      settings: {
-        ...prev.settings,
-        pinnedId: prev.settings.pinnedId === id ? null : prev.settings.pinnedId,
-      },
-    }))
-    setView({ name: 'list' })
-    setDraft(null)
-    baselineRef.current = null
-    setBaselineKey('')
-  }, [])
+  const handleDelete = useCallback(
+    (id: string) => {
+      const snapshot = deepCloneHandovers(data.handovers)
+      const pinSnap = data.settings.pinnedId
+      setData((prev) => ({
+        ...prev,
+        handovers: prev.handovers.filter((h) => h.id !== id),
+        settings: {
+          ...prev.settings,
+          pinnedId: prev.settings.pinnedId === id ? null : prev.settings.pinnedId,
+        },
+      }))
+      setView({ name: 'list' })
+      setDraft(null)
+      baselineRef.current = null
+      setBaselineKey('')
+      offerUndo({
+        kind: 'handovers',
+        message: t(lang, 'undoDeleted'),
+        handovers: snapshot,
+        pinnedId: pinSnap,
+      })
+    },
+    [data.handovers, data.settings.pinnedId, lang, offerUndo],
+  )
 
   const handleDuplicate = useCallback(
     (id: string) => {
@@ -276,6 +358,8 @@ export default function App() {
     (days: number): number => {
       const removed = countOlderThan(data.handovers, days)
       if (removed === 0) return 0
+      const snapshot = deepCloneHandovers(data.handovers)
+      const pinSnap = data.settings.pinnedId
       setData((prev) => {
         const kept = filterKeepRecent(prev.handovers, days)
         const pin = prev.settings.pinnedId
@@ -286,10 +370,44 @@ export default function App() {
           settings: { ...prev.settings, pinnedId: pinStill },
         }
       })
+      offerUndo({
+        kind: 'handovers',
+        message: tf(lang, 'undoWiped', { n: removed }),
+        handovers: snapshot,
+        pinnedId: pinSnap,
+      })
       return removed
     },
-    [data.handovers],
+    [data.handovers, data.settings.pinnedId, lang, offerUndo],
   )
+
+  const handleMarkReadyUndo = useCallback(
+    (previous: ShiftHandover) => {
+      offerUndo({
+        kind: 'markReady',
+        message: t(lang, 'undoMarkReady'),
+        previous,
+      })
+    },
+    [lang, offerUndo],
+  )
+
+  const handleUndo = useCallback(() => {
+    if (!undo) return
+    if (undo.kind === 'handovers') {
+      setData((prev) => ({
+        ...prev,
+        handovers: deepCloneHandovers(undo.handovers),
+        settings: { ...prev.settings, pinnedId: undo.pinnedId ?? null },
+      }))
+    } else if (undo.kind === 'markReady') {
+      const restored = cloneDraft(undo.previous)
+      setDraft(restored)
+      // Keep baseline so dirty reflects undo of ready mark
+      setView({ name: 'editor', id: restored.id })
+    }
+    dismissUndo()
+  }, [undo, dismissUndo])
 
   const handleExport = useCallback(() => {
     if (!draft) return
@@ -335,9 +453,11 @@ export default function App() {
               lastTemplateId={data.settings.lastTemplateId}
               pinnedId={pinnedId}
               compactUi={compactUi}
+              haptics={haptics}
               booting={booting}
               onDefaultShiftChange={setDefaultShift}
               onCompactUiChange={setCompactUi}
+              onHapticsChange={setHaptics}
               onNew={handleNew}
               onOpen={(id) => openEditor(id)}
               onDelete={handleDelete}
@@ -354,6 +474,8 @@ export default function App() {
               draft={draft}
               dirty={dirty}
               pinned={pinnedId === draft.id}
+              haptics={haptics}
+              exportCompact={exportCompact}
               onChange={setDraft}
               onSave={handleSave}
               onExport={handleExport}
@@ -364,6 +486,7 @@ export default function App() {
                   ? handlePinFromEditor
                   : undefined
               }
+              onMarkReadyUndo={handleMarkReadyUndo}
               onBack={handleEditorBack}
             />
           )}
@@ -372,6 +495,9 @@ export default function App() {
             <Export
               lang={lang}
               handover={exportHandover}
+              exportCompact={exportCompact}
+              haptics={haptics}
+              onExportCompactChange={setExportCompact}
               onBack={() => {
                 if (draft) {
                   setView({ name: 'editor', id: draft.id })
@@ -383,6 +509,15 @@ export default function App() {
           )}
         </div>
       </main>
+
+      {undo && (
+        <UndoToast
+          lang={lang}
+          message={undo.message}
+          onUndo={handleUndo}
+          onDismiss={dismissUndo}
+        />
+      )}
     </div>
   )
 }

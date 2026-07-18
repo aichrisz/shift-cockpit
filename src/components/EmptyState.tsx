@@ -1,27 +1,95 @@
 import type { Lang } from '../types'
 import { t } from '../i18n'
 
+export type EmptyKind = 'none' | 'filter' | 'search'
+
 interface EmptyStateProps {
   lang: Lang
-  onNew: () => void
-  onLoadSample: () => void
+  kind?: EmptyKind
+  onNew?: () => void
+  onLoadSample?: () => void
+  onClearSearch?: () => void
+  onShowAll?: () => void
 }
 
-export function EmptyState({ lang, onNew, onLoadSample }: EmptyStateProps) {
-  return (
-    <div className="empty-state" role="status">
-      <div className="empty-icon" aria-hidden="true">
-        ⌂
+function EmptyIllustration({ kind }: { kind: EmptyKind }) {
+  if (kind === 'search') {
+    return (
+      <div className="empty-illo empty-illo-search" aria-hidden="true">
+        <span className="empty-illo-ring" />
+        <span className="empty-illo-handle" />
       </div>
-      <h2 className="empty-title">{t(lang, 'emptyTitle')}</h2>
-      <p className="empty-body">{t(lang, 'emptyBody')}</p>
+    )
+  }
+  if (kind === 'filter') {
+    return (
+      <div className="empty-illo empty-illo-filter" aria-hidden="true">
+        <span className="empty-illo-bar" />
+        <span className="empty-illo-bar short" />
+        <span className="empty-illo-bar mid" />
+      </div>
+    )
+  }
+  return (
+    <div className="empty-illo empty-illo-none" aria-hidden="true">
+      <span className="empty-illo-card" />
+      <span className="empty-illo-plus">+</span>
+    </div>
+  )
+}
+
+export function EmptyState({
+  lang,
+  kind = 'none',
+  onNew,
+  onLoadSample,
+  onClearSearch,
+  onShowAll,
+}: EmptyStateProps) {
+  const titleKey =
+    kind === 'search'
+      ? 'emptySearchTitle'
+      : kind === 'filter'
+        ? 'emptyFilterTitle'
+        : 'emptyNoneTitle'
+  const bodyKey =
+    kind === 'search'
+      ? 'emptySearchBody'
+      : kind === 'filter'
+        ? 'emptyFilterBody'
+        : 'emptyNoneBody'
+
+  return (
+    <div className={`empty-state empty-state-${kind}`} role="status">
+      <EmptyIllustration kind={kind} />
+      <h2 className="empty-title">{t(lang, titleKey)}</h2>
+      <p className="empty-body">{t(lang, bodyKey)}</p>
       <div className="empty-actions">
-        <button type="button" className="btn btn-primary" onClick={onNew}>
-          {t(lang, 'newShift')}
-        </button>
-        <button type="button" className="btn btn-ghost" onClick={onLoadSample}>
-          {t(lang, 'loadSample')}
-        </button>
+        {kind === 'none' && onNew && (
+          <button type="button" className="btn btn-primary" onClick={onNew}>
+            {t(lang, 'newShift')}
+          </button>
+        )}
+        {kind === 'none' && onLoadSample && (
+          <button type="button" className="btn btn-ghost" onClick={onLoadSample}>
+            {t(lang, 'loadSample')}
+          </button>
+        )}
+        {kind === 'search' && onClearSearch && (
+          <button type="button" className="btn btn-primary" onClick={onClearSearch}>
+            {t(lang, 'clearSearch')}
+          </button>
+        )}
+        {kind === 'filter' && onShowAll && (
+          <button type="button" className="btn btn-primary" onClick={onShowAll}>
+            {t(lang, 'filterShowAll')}
+          </button>
+        )}
+        {(kind === 'filter' || kind === 'search') && onNew && (
+          <button type="button" className="btn btn-ghost" onClick={onNew}>
+            {t(lang, 'newShift')}
+          </button>
+        )}
       </div>
     </div>
   )

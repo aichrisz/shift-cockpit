@@ -8,8 +8,10 @@ interface SettingsProps {
   lang: Lang
   defaultShift: string
   compactUi: boolean
+  haptics: boolean
   onDefaultShiftChange: (value: string) => void
   onCompactUiChange: (value: boolean) => void
+  onHapticsChange: (value: boolean) => void
   handovers: ShiftHandover[]
   onWipeOlder: (days: number) => number
 }
@@ -27,8 +29,10 @@ export function Settings({
   lang,
   defaultShift,
   compactUi,
+  haptics,
   onDefaultShiftChange,
   onCompactUiChange,
+  onHapticsChange,
   handovers,
   onWipeOlder,
 }: SettingsProps) {
@@ -58,7 +62,7 @@ export function Settings({
   }
 
   return (
-    <section className="settings-panel" aria-labelledby="settings-heading">
+    <section className="settings-panel no-print" aria-labelledby="settings-heading">
       <ConfirmDialog
         lang={lang}
         open={wipeOpen}
@@ -95,6 +99,20 @@ export function Settings({
           <span className="settings-toggle-label">{t(lang, 'compactUi')}</span>
           <span className="settings-hint settings-toggle-hint">
             {t(lang, 'compactUiHint')}
+          </span>
+        </span>
+      </label>
+
+      <label className="settings-toggle">
+        <input
+          type="checkbox"
+          checked={haptics}
+          onChange={(e) => onHapticsChange(e.target.checked)}
+        />
+        <span>
+          <span className="settings-toggle-label">{t(lang, 'haptics')}</span>
+          <span className="settings-hint settings-toggle-hint">
+            {t(lang, 'hapticsHint')}
           </span>
         </span>
       </label>
