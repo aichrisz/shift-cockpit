@@ -15,7 +15,7 @@ interface ExportProps {
 }
 
 export function Export({ lang, handover, onBack }: ExportProps) {
-  const markdown = useMemo(() => handoverToMarkdown(handover), [handover])
+  const markdown = useMemo(() => handoverToMarkdown(handover, lang), [handover, lang])
   const [copied, setCopied] = useState(false)
   const [shareMsg, setShareMsg] = useState<string | null>(null)
 

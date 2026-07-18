@@ -265,6 +265,65 @@ button {
   letter-spacing: 0.02em;
 }
 
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.field-label-row .field-label {
+  margin: 0;
+}
+
+.room-helper {
+  display: flex;
+  gap: var(--space-2);
+  align-items: stretch;
+}
+
+.room-helper-input {
+  flex: 1;
+  min-width: 0;
+  max-width: 8rem;
+}
+
+.dirty-badge {
+  align-self: center;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.active-badge {
+  display: inline-block;
+  margin-right: 0.4rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(196, 163, 90, 0.4);
+  color: var(--accent);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.handover-card.is-pinned {
+  border-color: rgba(196, 163, 90, 0.45);
+  box-shadow: 0 0 0 1px rgba(196, 163, 90, 0.2), var(--shadow);
+}
+
+.panel-head-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
 .input {
   width: 100%;
   min-height: var(--tap);

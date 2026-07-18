@@ -1,4 +1,4 @@
-import type { ShiftHandover } from '../types'
+import type { Lang, ShiftHandover } from '../types'
 
 function perPerson(total: number | null, people: number | null): string {
   if (total === null || people === null || people <= 0) return '—'
@@ -11,37 +11,115 @@ function section(body: string): string {
   return trimmed.length > 0 ? trimmed : '—'
 }
 
-export function handoverToMarkdown(h: ShiftHandover): string {
+interface MdLabels {
+  title: string
+  updated: string
+  openPoints: string
+  roomNotes: string
+  guestNotes: string
+  checklist: string
+  tips: string
+  total: string
+  people: string
+  perPerson: string
+  note: string
+  none: string
+}
+
+const LABELS: Record<Lang, MdLabels> = {
+  de: {
+    title: 'Übergabe',
+    updated: 'Aktualisiert',
+    openPoints: 'Offene Punkte',
+    roomNotes: 'Zimmer',
+    guestNotes: 'Gäste',
+    checklist: 'Checkliste',
+    tips: 'Trinkgeld',
+    total: 'Gesamt',
+    people: 'Personen',
+    perPerson: 'pro Person',
+    note: 'Notiz',
+    none: '(keine)',
+  },
+  en: {
+    title: 'Shift handover',
+    updated: 'Updated',
+    openPoints: 'Open points',
+    roomNotes: 'Room notes',
+    guestNotes: 'Guest notes',
+    checklist: 'Checklist',
+    tips: 'Tips',
+    total: 'Total',
+    people: 'People',
+    perPerson: 'per person',
+    note: 'Note',
+    none: '(none)',
+  },
+  id: {
+    title: 'Serah terima shift',
+    updated: 'Diperbarui',
+    openPoints: 'Poin terbuka',
+    roomNotes: 'Catatan kamar',
+    guestNotes: 'Catatan tamu',
+    checklist: 'Checklist',
+    tips: 'Tip',
+    total: 'Total',
+    people: 'Orang',
+    perPerson: 'per orang',
+    note: 'Catatan',
+    none: '(tidak ada)',
+  },
+}
+
+/** Checklist as markdown task lines only (for section copy). */
+export function checklistToMarkdown(h: ShiftHandover): string {
+  if (h.checklist.length === 0) return ''
+  return h.checklist
+    .map((item) => `- [${item.done ? 'x' : ' '}] ${item.label}`)
+    .join('\n')
+}
+
+/**
+ * Full handover markdown. Section headers follow `style` (UI lang preferred).
+ * Falls back to handover.lang, then English.
+ */
+export function handoverToMarkdown(h: ShiftHandover, style?: Lang): string {
+  const lang: Lang =
+    style === 'de' || style === 'en' || style === 'id'
+      ? style
+      : h.lang === 'de' || h.lang === 'en' || h.lang === 'id'
+        ? h.lang
+        : 'en'
+  const L = LABELS[lang]
+
   const checklistLines =
     h.checklist.length === 0
-      ? '- (none)'
-      : h.checklist
-          .map((item) => `- [${item.done ? 'x' : ' '}] ${item.label}`)
-          .join('\n')
+      ? `- ${L.none}`
+      : checklistToMarkdown(h)
 
   const tipTotal = h.tipTotal === null ? '—' : String(h.tipTotal)
   const tipPeople = h.tipPeople === null ? '—' : String(h.tipPeople)
   const tipPer = perPerson(h.tipTotal, h.tipPeople)
-  const tipNote = h.tipNote.trim() ? `\nNote: ${h.tipNote.trim()}` : ''
+  const tipNote = h.tipNote.trim() ? `\n${L.note}: ${h.tipNote.trim()}` : ''
 
   return [
-    `# Shift handover — ${h.date} — ${h.shiftLabel || '—'}`,
-    `Updated: ${h.updatedAt}`,
+    `# ${L.title} — ${h.date} — ${h.shiftLabel || '—'}`,
+    `${L.updated}: ${h.updatedAt}`,
     '',
-    '## Open points',
+    `## ${L.openPoints}`,
     section(h.openPoints),
     '',
-    '## Room notes',
+    `## ${L.roomNotes}`,
     section(h.roomNotes),
     '',
-    '## Guest notes',
+    `## ${L.guestNotes}`,
     section(h.guestNotes),
     '',
-    '## Checklist',
+    `## ${L.checklist}`,
     checklistLines,
     '',
-    '## Tips',
-    `Total: ${tipTotal} / People: ${tipPeople} → per person: ${tipPer}${tipNote}`,
+    `## ${L.tips}`,
+    `${L.total}: ${tipTotal} / ${L.people}: ${tipPeople} → ${L.perPerson}: ${tipPer}${tipNote}`,
     '',
   ].join('\n')
 }

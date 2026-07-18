@@ -7,9 +7,10 @@ interface ChecklistProps {
   lang: Lang
   items: ChecklistItem[]
   onChange: (items: ChecklistItem[]) => void
+  onCopy?: () => void
 }
 
-export function Checklist({ lang, items, onChange }: ChecklistProps) {
+export function Checklist({ lang, items, onChange, onCopy }: ChecklistProps) {
   const [draft, setDraft] = useState('')
 
   function toggle(id: string) {
@@ -35,9 +36,20 @@ export function Checklist({ lang, items, onChange }: ChecklistProps) {
         <h2 id="checklist-heading" className="panel-title">
           {t(lang, 'checklist')}
         </h2>
-        <span className="panel-meta">
-          {done}/{items.length} {t(lang, 'doneCount')}
-        </span>
+        <div className="panel-head-actions">
+          {onCopy && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-compact no-print"
+              onClick={onCopy}
+            >
+              {t(lang, 'copy')}
+            </button>
+          )}
+          <span className="panel-meta">
+            {done}/{items.length} {t(lang, 'doneCount')}
+          </span>
+        </div>
       </div>
 
       <ul className="checklist" role="list">

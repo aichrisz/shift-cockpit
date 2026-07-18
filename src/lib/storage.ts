@@ -7,6 +7,7 @@ export const STORAGE_KEY = 'shift-cockpit-v1'
 const DEFAULT_SETTINGS: Settings = {
   lang: 'de',
   defaultShift: '',
+  pinnedId: null,
 }
 
 export function defaultAppData(): AppData {
@@ -82,6 +83,16 @@ export function loadAppData(): AppData {
       : []
 
     const lastTemplateId = normalizeTemplateId(settingsRaw.lastTemplateId)
+    const pinnedIdRaw = settingsRaw.pinnedId
+    const pinnedId =
+      typeof pinnedIdRaw === 'string'
+        ? pinnedIdRaw
+        : pinnedIdRaw === null
+          ? null
+          : undefined
+    // Drop pin if the handover no longer exists
+    const pinnedResolved =
+      pinnedId && handovers.some((h) => h.id === pinnedId) ? pinnedId : null
 
     return {
       version: 1,
@@ -92,6 +103,7 @@ export function loadAppData(): AppData {
             ? settingsRaw.defaultShift
             : DEFAULT_SETTINGS.defaultShift,
         ...(lastTemplateId ? { lastTemplateId } : {}),
+        pinnedId: pinnedResolved,
       },
       handovers,
     }

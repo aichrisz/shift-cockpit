@@ -66,6 +66,17 @@ export type MessageKey =
   | 'wipeConfirm'
   | 'wipeDone'
   | 'wipeNone'
+  | 'roomNumberPh'
+  | 'roomAdd'
+  | 'pin'
+  | 'unpin'
+  | 'activeBadge'
+  | 'copySection'
+  | 'copyOpen'
+  | 'copyRoom'
+  | 'copyGuest'
+  | 'copyChecklist'
+  | 'dirtyLeaveConfirm'
 
 const de: Record<MessageKey, string> = {
   appTitle: 'Shift Cockpit',
@@ -133,6 +144,17 @@ const de: Record<MessageKey, string> = {
   wipeConfirm: '{n} Übergabe(n) älter als {d} Tage unwiderruflich löschen?',
   wipeDone: '{n} gelöscht',
   wipeNone: 'Keine älteren Übergaben',
+  roomNumberPh: 'Zi. Nr.',
+  roomAdd: 'Zi. +',
+  pin: 'Anheften',
+  unpin: 'Lösen',
+  activeBadge: 'Aktiv',
+  copySection: 'Abschnitt kopieren',
+  copyOpen: 'Offene Punkte',
+  copyRoom: 'Zimmer',
+  copyGuest: 'Gäste',
+  copyChecklist: 'Checkliste',
+  dirtyLeaveConfirm: 'Ungespeicherte Änderungen verwerfen?',
 }
 
 const en: Record<MessageKey, string> = {
@@ -201,6 +223,17 @@ const en: Record<MessageKey, string> = {
   wipeConfirm: 'Permanently delete {n} handover(s) older than {d} days?',
   wipeDone: '{n} deleted',
   wipeNone: 'No older handovers',
+  roomNumberPh: 'Rm. no.',
+  roomAdd: 'Rm. +',
+  pin: 'Pin',
+  unpin: 'Unpin',
+  activeBadge: 'Active',
+  copySection: 'Copy section',
+  copyOpen: 'Open points',
+  copyRoom: 'Rooms',
+  copyGuest: 'Guests',
+  copyChecklist: 'Checklist',
+  dirtyLeaveConfirm: 'Discard unsaved changes?',
 }
 
 const id: Record<MessageKey, string> = {
@@ -269,6 +302,17 @@ const id: Record<MessageKey, string> = {
   wipeConfirm: 'Hapus permanen {n} serah terima lebih dari {d} hari?',
   wipeDone: '{n} dihapus',
   wipeNone: 'Tidak ada yang lebih lama',
+  roomNumberPh: 'No. Km.',
+  roomAdd: 'Km. +',
+  pin: 'Sematkan',
+  unpin: 'Lepas',
+  activeBadge: 'Aktif',
+  copySection: 'Salin bagian',
+  copyOpen: 'Poin terbuka',
+  copyRoom: 'Kamar',
+  copyGuest: 'Tamu',
+  copyChecklist: 'Checklist',
+  dirtyLeaveConfirm: 'Buang perubahan yang belum disimpan?',
 }
 
 const catalogs: Record<Lang, Record<MessageKey, string>> = { de, en, id }

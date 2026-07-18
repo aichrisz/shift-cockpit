@@ -15,11 +15,13 @@ interface ListProps {
   handovers: ShiftHandover[]
   defaultShift: string
   lastTemplateId?: string
+  pinnedId?: string | null
   onDefaultShiftChange: (value: string) => void
   onNew: (choice: CreateChoice) => void
   onOpen: (id: string) => void
   onDelete: (id: string) => void
   onDuplicate: (id: string) => void
+  onPinToggle: (id: string) => void
   onLoadSample: () => void
   onWipeOlder: (days: number) => number
 }
@@ -41,11 +43,13 @@ export function List({
   handovers,
   defaultShift,
   lastTemplateId,
+  pinnedId,
   onDefaultShiftChange,
   onNew,
   onOpen,
   onDelete,
   onDuplicate,
+  onPinToggle,
   onLoadSample,
   onWipeOlder,
 }: ListProps) {
@@ -59,13 +63,16 @@ export function List({
     [handovers, filter],
   )
 
-  const sorted = useMemo(
-    () =>
-      [...filtered].sort(
-        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-      ),
-    [filtered],
-  )
+  const sorted = useMemo(() => {
+    const list = [...filtered].sort(
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    )
+    if (!pinnedId) return list
+    const pinIdx = list.findIndex((h) => h.id === pinnedId)
+    if (pinIdx <= 0) return list
+    const [pinned] = list.splice(pinIdx, 1)
+    return [pinned, ...list]
+  }, [filtered, pinnedId])
 
   function startNew() {
     setPicking(true)
@@ -140,14 +147,21 @@ export function List({
               {sorted.map((h) => {
                 const done = h.checklist.filter((c) => c.done).length
                 const total = h.checklist.length
+                const isPinned = pinnedId === h.id
                 return (
-                  <li key={h.id} className="handover-card">
+                  <li
+                    key={h.id}
+                    className={`handover-card${isPinned ? ' is-pinned' : ''}`}
+                  >
                     <button
                       type="button"
                       className="handover-main"
                       onClick={() => onOpen(h.id)}
                     >
                       <span className="handover-title">
+                        {isPinned && (
+                          <span className="active-badge">{t(lang, 'activeBadge')}</span>
+                        )}
                         {h.shiftLabel || t(lang, 'shiftLabel')} · {h.date}
                       </span>
                       <span className="handover-meta">
@@ -156,6 +170,13 @@ export function List({
                       </span>
                     </button>
                     <div className="handover-actions no-print">
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-compact"
+                        onClick={() => onPinToggle(h.id)}
+                      >
+                        {isPinned ? t(lang, 'unpin') : t(lang, 'pin')}
+                      </button>
                       <button
                         type="button"
                         className="btn btn-ghost btn-compact"

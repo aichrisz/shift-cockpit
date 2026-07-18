@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { AppData, Lang, ShiftHandover, View } from './types'
 import type { CreateChoice } from './components/TemplatePicker'
 import type { TemplateId } from './data/templates'
@@ -12,6 +12,7 @@ import { createPresetChecklist } from './data/presets'
 import { createSampleHandover } from './data/sample'
 import { createTemplateChecklist, templateShiftLabel } from './data/templates'
 import { localIsoDate } from './lib/dates'
+import { handoverSnapshot, isHandoverDirty } from './lib/dirty'
 
 function todayIsoDate(): string {
   return localIsoDate()
@@ -77,16 +78,35 @@ function cloneHandover(source: ShiftHandover): ShiftHandover {
   }
 }
 
+function cloneDraft(h: ShiftHandover): ShiftHandover {
+  return { ...h, checklist: h.checklist.map((c) => ({ ...c })) }
+}
+
 export default function App() {
   const [data, setData] = useState<AppData>(() => loadAppData())
   const [view, setView] = useState<View>({ name: 'list' })
   const [draft, setDraft] = useState<ShiftHandover | null>(null)
+  /** Baseline for dirty detection — set when draft is loaded/created/saved. */
+  const baselineRef = useRef<ShiftHandover | null>(null)
+  const [baselineKey, setBaselineKey] = useState('')
 
   useEffect(() => {
     saveAppData(data)
   }, [data])
 
   const lang = data.settings.lang
+  const pinnedId = data.settings.pinnedId ?? null
+
+  const setBaseline = useCallback((h: ShiftHandover | null) => {
+    baselineRef.current = h ? cloneDraft(h) : null
+    setBaselineKey(h ? handoverSnapshot(h) : '')
+  }, [])
+
+  const dirty = useMemo(() => {
+    void baselineKey
+    if (!draft || !baselineRef.current) return false
+    return isHandoverDirty(draft, baselineRef.current)
+  }, [draft, baselineKey])
 
   const setLang = useCallback((next: Lang) => {
     setData((prev) => ({
@@ -102,6 +122,19 @@ export default function App() {
     }))
   }, [])
 
+  const handlePinToggle = useCallback(
+    (id: string) => {
+      setData((prev) => ({
+        ...prev,
+        settings: {
+          ...prev.settings,
+          pinnedId: prev.settings.pinnedId === id ? null : id,
+        },
+      }))
+    },
+    [],
+  )
+
   const openEditor = useCallback(
     (id: string) => {
       const existing = data.handovers.find((h) => h.id === id)
@@ -109,10 +142,12 @@ export default function App() {
         setView({ name: 'list' })
         return
       }
-      setDraft({ ...existing, checklist: existing.checklist.map((c) => ({ ...c })) })
+      const next = cloneDraft(existing)
+      setDraft(next)
+      setBaseline(next)
       setView({ name: 'editor', id })
     },
-    [data.handovers],
+    [data.handovers, setBaseline],
   )
 
   const handleNew = useCallback(
@@ -128,9 +163,10 @@ export default function App() {
         }))
       }
       setDraft(handover)
+      setBaseline(handover)
       setView({ name: 'editor', id: null })
     },
-    [data.settings.defaultShift, lang],
+    [data.settings.defaultShift, lang, setBaseline],
   )
 
   const handleSave = useCallback(() => {
@@ -150,16 +186,23 @@ export default function App() {
       return { ...prev, handovers }
     })
     setDraft(saved)
+    setBaseline(saved)
     setView({ name: 'editor', id: saved.id })
-  }, [draft, lang])
+  }, [draft, lang, setBaseline])
 
   const handleDelete = useCallback((id: string) => {
     setData((prev) => ({
       ...prev,
       handovers: prev.handovers.filter((h) => h.id !== id),
+      settings: {
+        ...prev.settings,
+        pinnedId: prev.settings.pinnedId === id ? null : prev.settings.pinnedId,
+      },
     }))
     setView({ name: 'list' })
     setDraft(null)
+    baselineRef.current = null
+    setBaselineKey('')
   }, [])
 
   const handleDuplicate = useCallback(
@@ -171,10 +214,12 @@ export default function App() {
         ...prev,
         handovers: [copy, ...prev.handovers],
       }))
-      setDraft({ ...copy, checklist: copy.checklist.map((c) => ({ ...c })) })
+      const next = cloneDraft(copy)
+      setDraft(next)
+      setBaseline(next)
       setView({ name: 'editor', id: copy.id })
     },
-    [data.handovers],
+    [data.handovers, setBaseline],
   )
 
   const handleDuplicateDraft = useCallback(() => {
@@ -190,8 +235,9 @@ export default function App() {
       handovers: [copy, ...prev.handovers],
     }))
     setDraft(copy)
+    setBaseline(copy)
     setView({ name: 'editor', id: copy.id })
-  }, [data.handovers, draft])
+  }, [data.handovers, draft, setBaseline])
 
   const handleLoadSample = useCallback(() => {
     const sample = createSampleHandover(lang)
@@ -201,20 +247,41 @@ export default function App() {
     }))
   }, [lang])
 
-  const handleWipeOlder = useCallback((days: number): number => {
-    const removed = countOlderThan(data.handovers, days)
-    if (removed === 0) return 0
-    setData((prev) => ({
-      ...prev,
-      handovers: filterKeepRecent(prev.handovers, days),
-    }))
-    return removed
-  }, [data.handovers])
+  const handleWipeOlder = useCallback(
+    (days: number): number => {
+      const removed = countOlderThan(data.handovers, days)
+      if (removed === 0) return 0
+      setData((prev) => {
+        const kept = filterKeepRecent(prev.handovers, days)
+        const pin = prev.settings.pinnedId
+        const pinStill = pin && kept.some((h) => h.id === pin) ? pin : null
+        return {
+          ...prev,
+          handovers: kept,
+          settings: { ...prev.settings, pinnedId: pinStill },
+        }
+      })
+      return removed
+    },
+    [data.handovers],
+  )
 
   const handleExport = useCallback(() => {
     if (!draft) return
     setView({ name: 'export', id: draft.id })
   }, [draft])
+
+  const handleEditorBack = useCallback(() => {
+    setDraft(null)
+    baselineRef.current = null
+    setBaselineKey('')
+    setView({ name: 'list' })
+  }, [])
+
+  const handlePinFromEditor = useCallback(() => {
+    if (!draft) return
+    handlePinToggle(draft.id)
+  }, [draft, handlePinToggle])
 
   const exportHandover: ShiftHandover | null =
     view.name === 'export'
@@ -233,11 +300,13 @@ export default function App() {
             handovers={data.handovers}
             defaultShift={data.settings.defaultShift}
             lastTemplateId={data.settings.lastTemplateId}
+            pinnedId={pinnedId}
             onDefaultShiftChange={setDefaultShift}
             onNew={handleNew}
             onOpen={(id) => openEditor(id)}
             onDelete={handleDelete}
             onDuplicate={handleDuplicate}
+            onPinToggle={handlePinToggle}
             onLoadSample={handleLoadSample}
             onWipeOlder={handleWipeOlder}
           />
@@ -247,14 +316,19 @@ export default function App() {
           <Editor
             lang={lang}
             draft={draft}
+            dirty={dirty}
+            pinned={pinnedId === draft.id}
             onChange={setDraft}
             onSave={handleSave}
             onExport={handleExport}
             onDuplicate={handleDuplicateDraft}
-            onBack={() => {
-              setDraft(null)
-              setView({ name: 'list' })
-            }}
+            onPinToggle={
+              // Only pin handovers already in storage (avoid orphan pinnedId).
+              data.handovers.some((h) => h.id === draft.id)
+                ? handlePinFromEditor
+                : undefined
+            }
+            onBack={handleEditorBack}
           />
         )}
 
