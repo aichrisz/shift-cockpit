@@ -97,12 +97,13 @@ export function handoverToMarkdown(h: ShiftHandover, style?: Lang): string {
       ? `- ${L.none}`
       : checklistToMarkdown(h)
 
-  const tipTotal = h.tipTotal === null ? '—' : String(h.tipTotal)
-  const tipPeople = h.tipPeople === null ? '—' : String(h.tipPeople)
-  const tipPer = perPerson(h.tipTotal, h.tipPeople)
   const tipNote = h.tipNote.trim() ? `\n${L.note}: ${h.tipNote.trim()}` : ''
+  const hasTips =
+    h.tipTotal !== null ||
+    h.tipPeople !== null ||
+    h.tipNote.trim().length > 0
 
-  return [
+  const parts = [
     `# ${L.title} — ${h.date} — ${h.shiftLabel || '—'}`,
     `${L.updated}: ${h.updatedAt}`,
     '',
@@ -118,10 +119,20 @@ export function handoverToMarkdown(h: ShiftHandover, style?: Lang): string {
     `## ${L.checklist}`,
     checklistLines,
     '',
-    `## ${L.tips}`,
-    `${L.total}: ${tipTotal} / ${L.people}: ${tipPeople} → ${L.perPerson}: ${tipPer}${tipNote}`,
-    '',
-  ].join('\n')
+  ]
+
+  if (hasTips) {
+    const tipTotal = h.tipTotal === null ? '—' : String(h.tipTotal)
+    const tipPeople = h.tipPeople === null ? '—' : String(h.tipPeople)
+    const tipPer = perPerson(h.tipTotal, h.tipPeople)
+    parts.push(
+      `## ${L.tips}`,
+      `${L.total}: ${tipTotal} / ${L.people}: ${tipPeople} → ${L.perPerson}: ${tipPer}${tipNote}`,
+      '',
+    )
+  }
+
+  return parts.join('\n')
 }
 
 export function exportFilename(h: ShiftHandover): string {

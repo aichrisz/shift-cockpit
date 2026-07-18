@@ -35,6 +35,11 @@ export function Editor({
 }: EditorProps) {
   const [roomInput, setRoomInput] = useState('')
   const [copyFlash, setCopyFlash] = useState<string | null>(null)
+  const hasExistingTips =
+    draft.tipTotal !== null ||
+    draft.tipPeople !== null ||
+    draft.tipNote.trim().length > 0
+  const [tipsOpen, setTipsOpen] = useState(hasExistingTips)
   const roomFieldRef = useRef<HTMLInputElement>(null)
 
   function patch(partial: Partial<ShiftHandover>) {
@@ -242,15 +247,33 @@ export function Editor({
         onCopy={() => copySection(checklistToMarkdown(draft), 'copyChecklist')}
       />
 
-      <TipSplit
-        lang={lang}
-        tipTotal={draft.tipTotal}
-        tipPeople={draft.tipPeople}
-        tipNote={draft.tipNote}
-        onTotalChange={(tipTotal) => patch({ tipTotal })}
-        onPeopleChange={(tipPeople) => patch({ tipPeople })}
-        onNoteChange={(tipNote) => patch({ tipNote })}
-      />
+      <section className="panel tips-optional no-print" aria-labelledby="tips-optional-heading">
+        <div className="panel-head">
+          <h2 id="tips-optional-heading" className="panel-title">
+            {t(lang, 'tipsOptional')}
+          </h2>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            aria-expanded={tipsOpen}
+            onClick={() => setTipsOpen((o) => !o)}
+          >
+            {tipsOpen ? t(lang, 'tipsHide') : t(lang, 'tipsShow')}
+          </button>
+        </div>
+        <p className="muted tips-optional-hint">{t(lang, 'tipsOptionalHint')}</p>
+        {tipsOpen ? (
+          <TipSplit
+            lang={lang}
+            tipTotal={draft.tipTotal}
+            tipPeople={draft.tipPeople}
+            tipNote={draft.tipNote}
+            onTotalChange={(tipTotal) => patch({ tipTotal })}
+            onPeopleChange={(tipPeople) => patch({ tipPeople })}
+            onNoteChange={(tipNote) => patch({ tipNote })}
+          />
+        ) : null}
+      </section>
     </div>
   )
 }

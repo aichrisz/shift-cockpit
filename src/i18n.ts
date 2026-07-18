@@ -20,6 +20,10 @@ export type MessageKey =
   | 'addCustom'
   | 'customPlaceholder'
   | 'tips'
+  | 'tipsOptional'
+  | 'tipsOptionalHint'
+  | 'tipsShow'
+  | 'tipsHide'
   | 'tipTotal'
   | 'tipPeople'
   | 'tipNote'
@@ -98,6 +102,10 @@ const de: Record<MessageKey, string> = {
   addCustom: 'Hinzufügen',
   customPlaceholder: 'Eigener Punkt…',
   tips: 'Trinkgeld',
+  tipsOptional: 'Trinkgeld (optional)',
+  tipsOptionalHint: 'Nur bei Bedarf — standardmäßig ausgeblendet.',
+  tipsShow: 'Anzeigen',
+  tipsHide: 'Ausblenden',
   tipTotal: 'Gesamt',
   tipPeople: 'Personen',
   tipNote: 'Notiz',
@@ -177,6 +185,10 @@ const en: Record<MessageKey, string> = {
   addCustom: 'Add',
   customPlaceholder: 'Custom item…',
   tips: 'Tips',
+  tipsOptional: 'Tips (optional)',
+  tipsOptionalHint: 'Only if needed — hidden by default.',
+  tipsShow: 'Show',
+  tipsHide: 'Hide',
   tipTotal: 'Total',
   tipPeople: 'People',
   tipNote: 'Note',
@@ -256,6 +268,10 @@ const id: Record<MessageKey, string> = {
   addCustom: 'Tambah',
   customPlaceholder: 'Item kustom…',
   tips: 'Tip',
+  tipsOptional: 'Tip (opsional)',
+  tipsOptionalHint: 'Hanya jika perlu — default disembunyikan.',
+  tipsShow: 'Tampilkan',
+  tipsHide: 'Sembunyikan',
   tipTotal: 'Total',
   tipPeople: 'Orang',
   tipNote: 'Catatan',

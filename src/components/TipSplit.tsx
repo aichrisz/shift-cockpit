@@ -23,6 +23,7 @@ function formatPerPerson(total: number | null, people: number | null): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2)
 }
 
+/** Tip fields only — parent provides optional panel chrome. */
 export function TipSplit({
   lang,
   tipTotal,
@@ -35,11 +36,7 @@ export function TipSplit({
   const per = formatPerPerson(tipTotal, tipPeople)
 
   return (
-    <section className="panel" aria-labelledby="tips-heading">
-      <h2 id="tips-heading" className="panel-title">
-        {t(lang, 'tips')}
-      </h2>
-
+    <div className="tips-body">
       <div className="field-grid tip-grid">
         <label className="field">
           <span className="field-label">{t(lang, 'tipTotal')}</span>
@@ -81,6 +78,6 @@ export function TipSplit({
           onChange={(e) => onNoteChange(e.target.value)}
         />
       </label>
-    </section>
+    </div>
   )
 }
