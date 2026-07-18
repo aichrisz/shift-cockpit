@@ -2,6 +2,8 @@ import type { Lang, ShiftHandover } from '../types'
 import { t } from '../i18n'
 import { Checklist } from '../components/Checklist'
 import { TipSplit } from '../components/TipSplit'
+import { QuickChips } from '../components/QuickChips'
+import { appendChipLine } from '../data/chips'
 
 interface EditorProps {
   lang: Lang
@@ -76,16 +78,23 @@ export function Editor({
         </label>
       </div>
 
-      <label className="field">
-        <span className="field-label">{t(lang, 'openPoints')}</span>
+      <div className="field">
+        <span className="field-label" id="open-points-label">
+          {t(lang, 'openPoints')}
+        </span>
+        <QuickChips
+          lang={lang}
+          onPick={(phrase) => patch({ openPoints: appendChipLine(draft.openPoints, phrase) })}
+        />
         <textarea
           className="input textarea"
           rows={4}
           value={draft.openPoints}
           placeholder={t(lang, 'openPointsPh')}
+          aria-labelledby="open-points-label"
           onChange={(e) => patch({ openPoints: e.target.value })}
         />
-      </label>
+      </div>
 
       <label className="field">
         <span className="field-label">{t(lang, 'roomNotes')}</span>
@@ -98,16 +107,23 @@ export function Editor({
         />
       </label>
 
-      <label className="field">
-        <span className="field-label">{t(lang, 'guestNotes')}</span>
+      <div className="field">
+        <span className="field-label" id="guest-notes-label">
+          {t(lang, 'guestNotes')}
+        </span>
+        <QuickChips
+          lang={lang}
+          onPick={(phrase) => patch({ guestNotes: appendChipLine(draft.guestNotes, phrase) })}
+        />
         <textarea
           className="input textarea"
           rows={3}
           value={draft.guestNotes}
           placeholder={t(lang, 'guestNotesPh')}
+          aria-labelledby="guest-notes-label"
           onChange={(e) => patch({ guestNotes: e.target.value })}
         />
-      </label>
+      </div>
 
       <Checklist
         lang={lang}

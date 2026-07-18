@@ -47,6 +47,25 @@ export type MessageKey =
   | 'defaultShift'
   | 'defaultShiftPh'
   | 'print'
+  | 'chooseTemplate'
+  | 'templateBlank'
+  | 'templateFrueh'
+  | 'templateAbend'
+  | 'templateSpaet'
+  | 'quickChips'
+  | 'filterToday'
+  | 'filter7d'
+  | 'filterAll'
+  | 'filterEmpty'
+  | 'filterShowAll'
+  | 'share'
+  | 'shareUnavailable'
+  | 'wipeOlder'
+  | 'wipeDays'
+  | 'wipePreview'
+  | 'wipeConfirm'
+  | 'wipeDone'
+  | 'wipeNone'
 
 const de: Record<MessageKey, string> = {
   appTitle: 'Shift Cockpit',
@@ -95,6 +114,25 @@ const de: Record<MessageKey, string> = {
   defaultShift: 'Standard-Schicht',
   defaultShiftPh: 'z. B. Frühschicht',
   print: 'Drucken',
+  chooseTemplate: 'Vorlage wählen',
+  templateBlank: 'Leer',
+  templateFrueh: 'Früh',
+  templateAbend: 'Abend',
+  templateSpaet: 'Spät',
+  quickChips: 'Schnelltext',
+  filterToday: 'Heute',
+  filter7d: '7 Tage',
+  filterAll: 'Alle',
+  filterEmpty: 'Keine Übergaben in diesem Zeitraum.',
+  filterShowAll: 'Alle anzeigen',
+  share: 'Teilen',
+  shareUnavailable: 'Teilen nicht verfügbar — in Zwischenablage kopiert.',
+  wipeOlder: 'Ältere Übergaben löschen',
+  wipeDays: 'Älter als (Tage)',
+  wipePreview: '{n} Übergabe(n) älter als {d} Tage',
+  wipeConfirm: '{n} Übergabe(n) älter als {d} Tage unwiderruflich löschen?',
+  wipeDone: '{n} gelöscht',
+  wipeNone: 'Keine älteren Übergaben',
 }
 
 const en: Record<MessageKey, string> = {
@@ -144,6 +182,25 @@ const en: Record<MessageKey, string> = {
   defaultShift: 'Default shift',
   defaultShiftPh: 'e.g. Morning',
   print: 'Print',
+  chooseTemplate: 'Choose template',
+  templateBlank: 'Blank',
+  templateFrueh: 'Morning',
+  templateAbend: 'Evening',
+  templateSpaet: 'Late',
+  quickChips: 'Quick phrases',
+  filterToday: 'Today',
+  filter7d: '7 days',
+  filterAll: 'All',
+  filterEmpty: 'No handovers in this range.',
+  filterShowAll: 'Show all',
+  share: 'Share',
+  shareUnavailable: 'Share unavailable — copied to clipboard.',
+  wipeOlder: 'Delete older handovers',
+  wipeDays: 'Older than (days)',
+  wipePreview: '{n} handover(s) older than {d} days',
+  wipeConfirm: 'Permanently delete {n} handover(s) older than {d} days?',
+  wipeDone: '{n} deleted',
+  wipeNone: 'No older handovers',
 }
 
 const id: Record<MessageKey, string> = {
@@ -193,10 +250,42 @@ const id: Record<MessageKey, string> = {
   defaultShift: 'Shift default',
   defaultShiftPh: 'mis. Pagi',
   print: 'Cetak',
+  chooseTemplate: 'Pilih template',
+  templateBlank: 'Kosong',
+  templateFrueh: 'Pagi',
+  templateAbend: 'Sore',
+  templateSpaet: 'Malam',
+  quickChips: 'Frasa cepat',
+  filterToday: 'Hari ini',
+  filter7d: '7 hari',
+  filterAll: 'Semua',
+  filterEmpty: 'Tidak ada serah terima di rentang ini.',
+  filterShowAll: 'Tampilkan semua',
+  share: 'Bagikan',
+  shareUnavailable: 'Bagikan tidak tersedia — disalin ke papan klip.',
+  wipeOlder: 'Hapus serah terima lama',
+  wipeDays: 'Lebih dari (hari)',
+  wipePreview: '{n} serah terima lebih dari {d} hari',
+  wipeConfirm: 'Hapus permanen {n} serah terima lebih dari {d} hari?',
+  wipeDone: '{n} dihapus',
+  wipeNone: 'Tidak ada yang lebih lama',
 }
 
 const catalogs: Record<Lang, Record<MessageKey, string>> = { de, en, id }
 
 export function t(lang: Lang, key: MessageKey): string {
   return catalogs[lang][key] ?? catalogs.en[key] ?? key
+}
+
+/** Simple `{n}` / `{d}` placeholder fill for wipe strings. */
+export function tf(
+  lang: Lang,
+  key: MessageKey,
+  vars: Record<string, string | number>,
+): string {
+  let s = t(lang, key)
+  for (const [k, v] of Object.entries(vars)) {
+    s = s.replaceAll(`{${k}}`, String(v))
+  }
+  return s
 }

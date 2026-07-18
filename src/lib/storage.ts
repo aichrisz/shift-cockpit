@@ -1,4 +1,5 @@
 import type { AppData, Settings, ShiftHandover } from '../types'
+import { localDaysAgoIso, localIsoDate } from './dates'
 
 export const STORAGE_KEY = 'shift-cockpit-v1'
 
@@ -49,7 +50,7 @@ function sanitizeHandover(raw: unknown): ShiftHandover | null {
     createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : new Date().toISOString(),
     updatedAt: typeof raw.updatedAt === 'string' ? raw.updatedAt : new Date().toISOString(),
     shiftLabel: typeof raw.shiftLabel === 'string' ? raw.shiftLabel : '',
-    date: typeof raw.date === 'string' ? raw.date : new Date().toISOString().slice(0, 10),
+    date: typeof raw.date === 'string' ? raw.date : localIsoDate(),
     openPoints: typeof raw.openPoints === 'string' ? raw.openPoints : '',
     roomNotes: typeof raw.roomNotes === 'string' ? raw.roomNotes : '',
     guestNotes: typeof raw.guestNotes === 'string' ? raw.guestNotes : '',
@@ -79,6 +80,11 @@ export function loadAppData(): AppData {
       ? parsed.handovers.map(sanitizeHandover).filter((h): h is ShiftHandover => h !== null)
       : []
 
+    const lastTemplateId =
+      typeof settingsRaw.lastTemplateId === 'string' && settingsRaw.lastTemplateId.length > 0
+        ? settingsRaw.lastTemplateId
+        : undefined
+
     return {
       version: 1,
       settings: {
@@ -87,6 +93,7 @@ export function loadAppData(): AppData {
           typeof settingsRaw.defaultShift === 'string'
             ? settingsRaw.defaultShift
             : DEFAULT_SETTINGS.defaultShift,
+        ...(lastTemplateId ? { lastTemplateId } : {}),
       },
       handovers,
     }
@@ -106,4 +113,24 @@ export function saveAppData(data: AppData): void {
   } catch {
     // Quota or private mode — fail silently for MVP
   }
+}
+
+/** Count handovers whose `date` (YYYY-MM-DD) is strictly older than cutoff. */
+export function countOlderThan(handovers: ShiftHandover[], olderThanDays: number): number {
+  const cutoff = cutoffDateIso(olderThanDays)
+  return handovers.filter((h) => h.date < cutoff).length
+}
+
+/** Delete handovers older than N days (by `date` field). */
+export function filterKeepRecent(
+  handovers: ShiftHandover[],
+  olderThanDays: number,
+): ShiftHandover[] {
+  const cutoff = cutoffDateIso(olderThanDays)
+  return handovers.filter((h) => h.date >= cutoff)
+}
+
+function cutoffDateIso(olderThanDays: number): string {
+  // Keep rows with date >= today - N days (local calendar).
+  return localDaysAgoIso(olderThanDays)
 }

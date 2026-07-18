@@ -439,6 +439,159 @@ button {
   font-size: 0.8125rem;
 }
 
+.btn-danger-outline {
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  min-height: var(--tap);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.btn-danger-outline:hover:not(:disabled) {
+  background: var(--danger-dim);
+}
+
+.btn-danger-outline:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-danger-outline:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* —— History filter —— */
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.filter-chip {
+  min-height: 2.25rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.filter-chip:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.filter-chip.is-active {
+  background: var(--accent-dim);
+  border-color: rgba(196, 163, 90, 0.45);
+  color: var(--accent);
+}
+
+.filter-chip:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.filter-empty {
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  color: var(--text-muted);
+  background: var(--bg-panel);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-4);
+}
+
+.filter-empty p {
+  margin: 0 0 var(--space-4);
+}
+
+/* —— Template picker —— */
+
+.template-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgba(8, 10, 9, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.template-picker-card {
+  width: min(100%, 22rem);
+  padding: var(--space-5);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.template-btn {
+  width: 100%;
+}
+
+.template-btn.is-last {
+  box-shadow: 0 0 0 2px rgba(196, 163, 90, 0.35);
+}
+
+.template-cancel {
+  width: 100%;
+}
+
+/* —— Quick chips —— */
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.chip {
+  min-height: 2rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  max-width: 100%;
+}
+
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* —— Settings —— */
+
 .settings-panel {
   margin-top: var(--space-8);
   padding: var(--space-4);
@@ -449,6 +602,42 @@ button {
 
 .settings-panel .panel-title {
   margin-bottom: var(--space-3);
+}
+
+.settings-subhead {
+  margin: var(--space-5) 0 var(--space-3);
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.settings-hint {
+  margin: 0 0 var(--space-3);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.settings-status {
+  margin: var(--space-3) 0 0;
+  font-size: 0.8125rem;
+  color: var(--success);
+}
+
+.settings-wipe .field {
+  margin-bottom: var(--space-2);
+}
+
+/* —— Toast —— */
+
+.toast-msg {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--accent-dim);
+  border: 1px solid rgba(196, 163, 90, 0.25);
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .print-only {
@@ -659,13 +848,18 @@ button {
   .no-print,
   .lang-toggle,
   .list-toolbar,
+  .filter-row,
+  .chip-row,
   .editor-toolbar,
   .handover-actions,
   .btn,
   .btn-danger-ghost,
+  .btn-danger-outline,
   .btn-icon,
   .inline-add,
-  .settings-panel {
+  .settings-panel,
+  .template-picker,
+  .toast-msg {
     display: none !important;
   }
 

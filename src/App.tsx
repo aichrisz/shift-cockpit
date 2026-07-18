@@ -1,16 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { AppData, Lang, ShiftHandover, View } from './types'
+import type { CreateChoice } from './components/TemplatePicker'
+import type { TemplateId } from './data/templates'
 import { Header } from './components/Header'
 import { List } from './pages/List'
 import { Editor } from './pages/Editor'
 import { Export } from './pages/Export'
-import { loadAppData, saveAppData } from './lib/storage'
+import { loadAppData, saveAppData, filterKeepRecent, countOlderThan } from './lib/storage'
 import { createId } from './lib/id'
 import { createPresetChecklist } from './data/presets'
 import { createSampleHandover } from './data/sample'
+import { createTemplateChecklist, templateShiftLabel } from './data/templates'
+import { localIsoDate } from './lib/dates'
 
 function todayIsoDate(): string {
-  return new Date().toISOString().slice(0, 10)
+  return localIsoDate()
 }
 
 function createBlankHandover(lang: Lang, defaultShift: string): ShiftHandover {
@@ -25,6 +29,30 @@ function createBlankHandover(lang: Lang, defaultShift: string): ShiftHandover {
     roomNotes: '',
     guestNotes: '',
     checklist: createPresetChecklist(lang),
+    tipTotal: null,
+    tipPeople: null,
+    tipNote: '',
+    lang,
+  }
+}
+
+function createFromTemplate(
+  templateId: TemplateId,
+  lang: Lang,
+  defaultShift: string,
+): ShiftHandover {
+  const now = new Date().toISOString()
+  const label = templateShiftLabel(templateId, lang) || defaultShift
+  return {
+    id: createId(),
+    createdAt: now,
+    updatedAt: now,
+    shiftLabel: label,
+    date: todayIsoDate(),
+    openPoints: '',
+    roomNotes: '',
+    guestNotes: '',
+    checklist: createTemplateChecklist(templateId, lang),
     tipTotal: null,
     tipPeople: null,
     tipNote: '',
@@ -75,12 +103,7 @@ export default function App() {
   }, [])
 
   const openEditor = useCallback(
-    (id: string | null) => {
-      if (id === null) {
-        setDraft(createBlankHandover(lang, data.settings.defaultShift))
-        setView({ name: 'editor', id: null })
-        return
-      }
+    (id: string) => {
       const existing = data.handovers.find((h) => h.id === id)
       if (!existing) {
         setView({ name: 'list' })
@@ -89,7 +112,25 @@ export default function App() {
       setDraft({ ...existing, checklist: existing.checklist.map((c) => ({ ...c })) })
       setView({ name: 'editor', id })
     },
-    [data.handovers, data.settings.defaultShift, lang],
+    [data.handovers],
+  )
+
+  const handleNew = useCallback(
+    (choice: CreateChoice) => {
+      let handover: ShiftHandover
+      if (choice === 'blank') {
+        handover = createBlankHandover(lang, data.settings.defaultShift)
+      } else {
+        handover = createFromTemplate(choice, lang, data.settings.defaultShift)
+        setData((prev) => ({
+          ...prev,
+          settings: { ...prev.settings, lastTemplateId: choice },
+        }))
+      }
+      setDraft(handover)
+      setView({ name: 'editor', id: null })
+    },
+    [data.settings.defaultShift, lang],
   )
 
   const handleSave = useCallback(() => {
@@ -138,11 +179,9 @@ export default function App() {
 
   const handleDuplicateDraft = useCallback(() => {
     if (!draft) return
-    // Prefer saved source when draft exists in list; otherwise clone current draft fields
     const source = data.handovers.find((h) => h.id === draft.id) ?? draft
     const copy = cloneHandover({
       ...source,
-      // Use live draft field values when duplicating from editor
       ...draft,
       checklist: draft.checklist.map((c) => ({ ...c })),
     })
@@ -161,6 +200,16 @@ export default function App() {
       handovers: [sample, ...prev.handovers],
     }))
   }, [lang])
+
+  const handleWipeOlder = useCallback((days: number): number => {
+    const removed = countOlderThan(data.handovers, days)
+    if (removed === 0) return 0
+    setData((prev) => ({
+      ...prev,
+      handovers: filterKeepRecent(prev.handovers, days),
+    }))
+    return removed
+  }, [data.handovers])
 
   const handleExport = useCallback(() => {
     if (!draft) return
@@ -183,12 +232,14 @@ export default function App() {
             lang={lang}
             handovers={data.handovers}
             defaultShift={data.settings.defaultShift}
+            lastTemplateId={data.settings.lastTemplateId}
             onDefaultShiftChange={setDefaultShift}
-            onNew={() => openEditor(null)}
+            onNew={handleNew}
             onOpen={(id) => openEditor(id)}
             onDelete={handleDelete}
             onDuplicate={handleDuplicate}
             onLoadSample={handleLoadSample}
+            onWipeOlder={handleWipeOlder}
           />
         )}
 
