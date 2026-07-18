@@ -25,7 +25,7 @@ export interface ShiftHandover {
 export interface Settings {
   lang: Lang
   defaultShift: string
-  /** Last used shift template id (`frueh` | `abend` | `spaet`), optional. */
+  /** Last used shift template id (`frueh` | `nacht` | `spaet`; legacy `abend` → nacht). */
   lastTemplateId?: string
 }
 

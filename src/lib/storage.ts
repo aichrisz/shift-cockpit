@@ -1,4 +1,5 @@
 import type { AppData, Settings, ShiftHandover } from '../types'
+import { normalizeTemplateId } from '../data/templates'
 import { localDaysAgoIso, localIsoDate } from './dates'
 
 export const STORAGE_KEY = 'shift-cockpit-v1'
@@ -80,10 +81,7 @@ export function loadAppData(): AppData {
       ? parsed.handovers.map(sanitizeHandover).filter((h): h is ShiftHandover => h !== null)
       : []
 
-    const lastTemplateId =
-      typeof settingsRaw.lastTemplateId === 'string' && settingsRaw.lastTemplateId.length > 0
-        ? settingsRaw.lastTemplateId
-        : undefined
+    const lastTemplateId = normalizeTemplateId(settingsRaw.lastTemplateId)
 
     return {
       version: 1,

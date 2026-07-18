@@ -50,7 +50,7 @@ export type MessageKey =
   | 'chooseTemplate'
   | 'templateBlank'
   | 'templateFrueh'
-  | 'templateAbend'
+  | 'templateNacht'
   | 'templateSpaet'
   | 'quickChips'
   | 'filterToday'
@@ -97,7 +97,7 @@ const de: Record<MessageKey, string> = {
   exportPreview: 'Markdown-Vorschau',
   noHandovers: 'Keine Übergaben',
   updated: 'Aktualisiert',
-  shiftPlaceholder: 'z. B. Frühschicht / Abend',
+  shiftPlaceholder: 'z. B. Frühschicht / Nacht',
   openPointsPh: 'Was war noch offen beim Gehen?',
   roomNotesPh: 'Zimmer mit Follow-up…',
   guestNotesPh: 'VIP, Late Arrival, Beschwerden…',
@@ -108,7 +108,7 @@ const de: Record<MessageKey, string> = {
   cancel: 'Abbrechen',
   confirmDelete: 'Löschen bestätigen',
   unsaved: 'Nicht gespeichert',
-  sampleLabel: 'Beispiel-Abendschicht',
+  sampleLabel: 'Beispiel-Nachtschicht',
   duplicate: 'Duplizieren',
   settings: 'Einstellungen',
   defaultShift: 'Standard-Schicht',
@@ -117,7 +117,7 @@ const de: Record<MessageKey, string> = {
   chooseTemplate: 'Vorlage wählen',
   templateBlank: 'Leer',
   templateFrueh: 'Früh',
-  templateAbend: 'Abend',
+  templateNacht: 'Nacht',
   templateSpaet: 'Spät',
   quickChips: 'Schnelltext',
   filterToday: 'Heute',
@@ -165,7 +165,7 @@ const en: Record<MessageKey, string> = {
   exportPreview: 'Markdown preview',
   noHandovers: 'No handovers',
   updated: 'Updated',
-  shiftPlaceholder: 'e.g. Morning / Evening',
+  shiftPlaceholder: 'e.g. Morning / Night',
   openPointsPh: 'What was still open when you left?',
   roomNotesPh: 'Rooms needing follow-up…',
   guestNotesPh: 'VIP, late arrival, complaints…',
@@ -185,7 +185,7 @@ const en: Record<MessageKey, string> = {
   chooseTemplate: 'Choose template',
   templateBlank: 'Blank',
   templateFrueh: 'Morning',
-  templateAbend: 'Evening',
+  templateNacht: 'Night',
   templateSpaet: 'Late',
   quickChips: 'Quick phrases',
   filterToday: 'Today',
@@ -253,8 +253,8 @@ const id: Record<MessageKey, string> = {
   chooseTemplate: 'Pilih template',
   templateBlank: 'Kosong',
   templateFrueh: 'Pagi',
-  templateAbend: 'Sore',
-  templateSpaet: 'Malam',
+  templateNacht: 'Malam',
+  templateSpaet: 'Sore',
   quickChips: 'Frasa cepat',
   filterToday: 'Hari ini',
   filter7d: '7 hari',

@@ -1,5 +1,6 @@
 import type { Lang } from '../types'
 import type { TemplateId } from '../data/templates'
+import { normalizeTemplateId } from '../data/templates'
 import { t } from '../i18n'
 
 export type CreateChoice = TemplateId | 'blank'
@@ -11,13 +12,15 @@ interface TemplatePickerProps {
   onCancel: () => void
 }
 
-const OPTIONS: { id: CreateChoice; labelKey: 'templateFrueh' | 'templateAbend' | 'templateSpaet' | 'templateBlank' }[] =
-  [
-    { id: 'frueh', labelKey: 'templateFrueh' },
-    { id: 'abend', labelKey: 'templateAbend' },
-    { id: 'spaet', labelKey: 'templateSpaet' },
-    { id: 'blank', labelKey: 'templateBlank' },
-  ]
+const OPTIONS: {
+  id: CreateChoice
+  labelKey: 'templateFrueh' | 'templateNacht' | 'templateSpaet' | 'templateBlank'
+}[] = [
+  { id: 'frueh', labelKey: 'templateFrueh' },
+  { id: 'spaet', labelKey: 'templateSpaet' },
+  { id: 'nacht', labelKey: 'templateNacht' },
+  { id: 'blank', labelKey: 'templateBlank' },
+]
 
 export function TemplatePicker({
   lang,
@@ -25,6 +28,8 @@ export function TemplatePicker({
   onChoose,
   onCancel,
 }: TemplatePickerProps) {
+  const last = normalizeTemplateId(lastTemplateId)
+
   return (
     <div
       className="template-picker"
@@ -38,7 +43,7 @@ export function TemplatePicker({
         </h2>
         <div className="template-grid">
           {OPTIONS.map((opt) => {
-            const isLast = opt.id !== 'blank' && opt.id === lastTemplateId
+            const isLast = opt.id !== 'blank' && opt.id === last
             return (
               <button
                 key={opt.id}

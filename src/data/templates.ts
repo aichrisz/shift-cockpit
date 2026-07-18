@@ -2,8 +2,8 @@ import type { ChecklistItem, Lang } from '../types'
 import { createId } from '../lib/id'
 import { createPresetChecklist } from './presets'
 
-/** Stable template ids — do not rename. */
-export type TemplateId = 'frueh' | 'abend' | 'spaet'
+/** Stable template ids. Legacy `abend` migrates to `nacht` in storage. */
+export type TemplateId = 'frueh' | 'nacht' | 'spaet'
 
 export interface ShiftTemplate {
   id: TemplateId
@@ -48,10 +48,44 @@ export const SHIFT_TEMPLATES: ShiftTemplate[] = [
     },
   },
   {
-    id: 'abend',
+    id: 'nacht',
     labels: {
-      de: 'Abendschicht',
-      en: 'Evening shift',
+      de: 'Nachtschicht',
+      en: 'Night shift',
+      id: 'Shift malam',
+    },
+    checklist: {
+      de: [
+        'Kasse / Night audit',
+        'Late Arrivals / Walk-ins',
+        'Sicherheit / Türen / Außenlicht',
+        'Ruhezeiten / Lärm-Beschwerden',
+        'Gäste offen dokumentiert',
+        'Handover an Frühschicht',
+      ],
+      en: [
+        'Cash / night audit',
+        'Late arrivals / walk-ins',
+        'Security / doors / exterior lights',
+        'Quiet hours / noise complaints',
+        'Open guest issues logged',
+        'Handover to morning shift',
+      ],
+      id: [
+        'Kas / night audit',
+        'Late arrival / walk-in',
+        'Keamanan / pintu / lampu luar',
+        'Jam tenang / keluhan bising',
+        'Masalah tamu didokumentasikan',
+        'Serah terima ke shift pagi',
+      ],
+    },
+  },
+  {
+    id: 'spaet',
+    labels: {
+      de: 'Spätschicht',
+      en: 'Late shift',
       id: 'Shift sore',
     },
     checklist: {
@@ -61,7 +95,7 @@ export const SHIFT_TEMPLATES: ShiftTemplate[] = [
         'Schlüssel / Key control',
         'Gäste offen / Beschwerden',
         'Lobby tidy / Light check',
-        'Handover an Spät / Nacht',
+        'Handover an Nachtschicht',
       ],
       en: [
         'Cash / mid-shift count',
@@ -69,7 +103,7 @@ export const SHIFT_TEMPLATES: ShiftTemplate[] = [
         'Key control',
         'Open guests / complaints',
         'Lobby tidy / lights',
-        'Handover to late / night',
+        'Handover to night shift',
       ],
       id: [
         'Kas / hitung mid-shift',
@@ -78,40 +112,6 @@ export const SHIFT_TEMPLATES: ShiftTemplate[] = [
         'Tamu terbuka / keluhan',
         'Lobi rapi / cek lampu',
         'Serah terima ke shift malam',
-      ],
-    },
-  },
-  {
-    id: 'spaet',
-    labels: {
-      de: 'Spätschicht',
-      en: 'Late shift',
-      id: 'Shift malam',
-    },
-    checklist: {
-      de: [
-        'Kasse / Kassenabschluss',
-        'Night audit vorbereitet',
-        'Late Arrivals eingecheckt',
-        'Sicherheit / Türen / Lights',
-        'Gäste offen dokumentiert',
-        'Handover an Frühschicht',
-      ],
-      en: [
-        'Cash desk / close-out',
-        'Night audit prepared',
-        'Late arrivals checked in',
-        'Security / doors / lights',
-        'Open guest issues logged',
-        'Handover to morning shift',
-      ],
-      id: [
-        'Kasir / tutup kas',
-        'Night audit disiapkan',
-        'Late arrival check-in',
-        'Keamanan / pintu / lampu',
-        'Masalah tamu didokumentasikan',
-        'Serah terima ke shift pagi',
       ],
     },
   },
@@ -136,4 +136,11 @@ export function templateShiftLabel(id: TemplateId, lang: Lang): string {
   const tpl = getTemplate(id)
   if (!tpl) return ''
   return tpl.labels[lang] ?? tpl.labels.de
+}
+
+/** Map legacy template ids (v0.3 used `abend`). */
+export function normalizeTemplateId(raw: unknown): TemplateId | undefined {
+  if (raw === 'abend') return 'nacht'
+  if (raw === 'frueh' || raw === 'nacht' || raw === 'spaet') return raw
+  return undefined
 }

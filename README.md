@@ -30,7 +30,7 @@ VITE_BASE=/shift-cockpit/ npm run build
 
 ## Features (v0.3)
 
-- **Shift templates** — Früh / Abend / Spät (+ blank) with specialized checklists
+- **Shift templates** — Früh / Spät / Nacht (+ blank) with specialized checklists
 - **Quick chips** — one-tap handover phrases on open points & guest notes
 - **History filter** — Today · Last 7 days · All
 - **Share** — `navigator.share` on export, copy fallback

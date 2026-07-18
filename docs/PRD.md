@@ -48,7 +48,7 @@ There is no **fast, phone-friendly, offline-first** checklist for one person.
 | id | string | |
 | createdAt | ISO | |
 | updatedAt | ISO | |
-| shiftLabel | string | e.g. Frühschicht / Abend / Spät |
+| shiftLabel | string | e.g. Frühschicht / Spät / Nacht |
 | date | YYYY-MM-DD | default today |
 | openPoints | string | free text (bullet-friendly) |
 | roomNotes | string | Zimmer-Hinweise |
