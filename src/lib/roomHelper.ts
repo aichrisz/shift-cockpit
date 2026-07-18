@@ -8,6 +8,29 @@ export function roomPrefix(lang: Lang): string {
 }
 
 /**
+ * Room numbers already present after common prefixes (Zi. / Rm. / Km.).
+ * Matches patterns like `Zi. 204`, `Rm.204`, `Km. 12A`.
+ */
+export function extractRoomNumbers(roomNotes: string): string[] {
+  if (!roomNotes.trim()) return []
+  const re = /(?:Zi\.|Rm\.|Km\.)\s*(\d+[A-Za-z]?)/gi
+  const found: string[] = []
+  let m: RegExpExecArray | null
+  while ((m = re.exec(roomNotes)) !== null) {
+    const n = m[1]?.trim()
+    if (n) found.push(n)
+  }
+  return found
+}
+
+/** True if this room number already appears after a Zi./Rm./Km. prefix. */
+export function roomAlreadyListed(roomNotes: string, room: string): boolean {
+  const num = room.trim().toLowerCase()
+  if (!num) return false
+  return extractRoomNumbers(roomNotes).some((n) => n.toLowerCase() === num)
+}
+
+/**
  * Append a bullet room line: `- Zi. 204 — ` (trailing space after dash for notes).
  * Returns `current` unchanged when room is empty.
  */

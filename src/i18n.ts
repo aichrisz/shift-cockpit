@@ -149,6 +149,18 @@ export type MessageKey =
   | 'emptyIncompleteTitle'
   | 'emptyIncompleteBody'
   | 'clearIncompleteFilter'
+  | 'roomDuplicate'
+  | 'shiftLabelChips'
+  | 'handedOverBy'
+  | 'takenOverBy'
+  | 'printSignatures'
+  | 'appVersion'
+  | 'whatsNew'
+  | 'whatsNew1'
+  | 'whatsNew2'
+  | 'whatsNew3'
+  | 'whatsNew4'
+  | 'whatsNew5'
 
 const de: Record<MessageKey, string> = {
   appTitle: 'Shift Cockpit',
@@ -301,6 +313,18 @@ const de: Record<MessageKey, string> = {
   emptyIncompleteBody:
     'Keine Übergabe mit offenen Checklisten-Punkten. Filter ausschalten oder alle anzeigen.',
   clearIncompleteFilter: 'Filter aus',
+  roomDuplicate: 'Zimmer {room} ist bereits gelistet',
+  shiftLabelChips: 'Schicht-Schnellwahl',
+  handedOverBy: 'Übergeben von:',
+  takenOverBy: 'Übernommen von:',
+  printSignatures: 'Unterschriften',
+  appVersion: 'Version {v}',
+  whatsNew: 'Neu in dieser Version',
+  whatsNew1: 'Einstellungen als eigene Seite — die Home-Liste bleibt übersichtlich',
+  whatsNew2: 'Doppelte Zimmernummer: sanfter Hinweis beim Hinzufügen',
+  whatsNew3: 'Schicht-Chips: Früh / Spät / Nacht im Editor',
+  whatsNew4: 'Druck: Unterschriftszeilen für Übergeben / Übernommen',
+  whatsNew5: 'Versionsanzeige und Was ist neu in den Einstellungen',
 }
 
 const en: Record<MessageKey, string> = {
@@ -454,6 +478,18 @@ const en: Record<MessageKey, string> = {
   emptyIncompleteBody:
     'No handover has open checklist items. Turn off the filter or show all.',
   clearIncompleteFilter: 'Clear filter',
+  roomDuplicate: 'Room {room} already listed',
+  shiftLabelChips: 'Quick shift labels',
+  handedOverBy: 'Handed over by:',
+  takenOverBy: 'Taken over by:',
+  printSignatures: 'Signatures',
+  appVersion: 'Version {v}',
+  whatsNew: "What's new",
+  whatsNew1: 'Dedicated Settings page — home list stays clean',
+  whatsNew2: 'Duplicate room soft warning when adding Zi./Rm. lines',
+  whatsNew3: 'Shift label chips: Morning / Late / Night in the editor',
+  whatsNew4: 'Print signature lines for hand-over / take-over',
+  whatsNew5: 'Version number and What’s new in Settings',
 }
 
 const id: Record<MessageKey, string> = {
@@ -607,6 +643,18 @@ const id: Record<MessageKey, string> = {
   emptyIncompleteBody:
     'Tidak ada serah terima dengan checklist terbuka. Matikan filter atau tampilkan semua.',
   clearIncompleteFilter: 'Matikan filter',
+  roomDuplicate: 'Kamar {room} sudah tercantum',
+  shiftLabelChips: 'Label shift cepat',
+  handedOverBy: 'Diserahkan oleh:',
+  takenOverBy: 'Diterima oleh:',
+  printSignatures: 'Tanda tangan',
+  appVersion: 'Versi {v}',
+  whatsNew: 'Yang baru',
+  whatsNew1: 'Halaman Pengaturan terpisah — daftar beranda tetap rapi',
+  whatsNew2: 'Peringatan lembut jika nomor kamar sudah ada',
+  whatsNew3: 'Chip label shift: Pagi / Sore / Malam di editor',
+  whatsNew4: 'Baris tanda tangan cetak: serah / terima',
+  whatsNew5: 'Nomor versi dan Yang baru di Pengaturan',
 }
 
 const catalogs: Record<Lang, Record<MessageKey, string>> = { de, en, id }

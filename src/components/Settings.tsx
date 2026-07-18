@@ -8,6 +8,7 @@ import {
   parseBackupJson,
   shouldNudgeBackup,
 } from '../lib/backup'
+import { APP_VERSION, WHATS_NEW_KEYS } from '../version'
 import { ConfirmDialog } from './ConfirmDialog'
 
 interface SettingsProps {
@@ -150,9 +151,22 @@ export function Settings({
         onConfirm={confirmImport}
       />
 
-      <h2 id="settings-heading" className="panel-title">
+      <h2 id="settings-heading" className="visually-hidden">
         {t(lang, 'settings')}
       </h2>
+
+      <div className="settings-about">
+        <p className="settings-version" role="status">
+          {tf(lang, 'appVersion', { v: APP_VERSION })}
+        </p>
+        <h3 className="settings-subhead settings-subhead-first">{t(lang, 'whatsNew')}</h3>
+        <ul className="settings-whats-new">
+          {WHATS_NEW_KEYS.map((key) => (
+            <li key={key}>{t(lang, key)}</li>
+          ))}
+        </ul>
+      </div>
+
       <label className="field">
         <span className="field-label">{t(lang, 'defaultShift')}</span>
         <input

@@ -128,6 +128,51 @@ button {
   z-index: 10;
 }
 
+.header-start {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.header-end {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.header-settings {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.header-settings-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+  opacity: 0.9;
+}
+
+.header-settings-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+@media (max-width: 380px) {
+  .header-settings-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
 .app-title {
   margin: 0;
   font-size: 1.125rem;
@@ -1257,8 +1302,103 @@ button {
 
 /* —— Settings —— */
 
+.settings-page-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.settings-page-title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.settings-page-spacer {
+  width: 4.5rem;
+  flex-shrink: 0;
+}
+
+.settings-about {
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-version {
+  margin: 0 0 var(--space-2);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.settings-subhead-first {
+  margin-top: var(--space-3);
+}
+
+.settings-whats-new {
+  margin: 0;
+  padding-left: 1.15rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.settings-whats-new li {
+  margin-bottom: var(--space-1);
+}
+
+.settings-whats-new li:last-child {
+  margin-bottom: 0;
+}
+
+.shift-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.shift-label-chip {
+  font-size: 0.8125rem;
+}
+
+.print-signatures {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-strong, var(--border));
+}
+
+.print-sig-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  font-size: 0.875rem;
+}
+
+.print-sig-line:last-child {
+  margin-bottom: 0;
+}
+
+.print-sig-label {
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.print-sig-blank {
+  flex: 1;
+  min-width: 8rem;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.55;
+  height: 1.1em;
+}
+
 .settings-panel {
-  margin-top: var(--space-8);
+  margin-top: 0;
   padding: var(--space-4);
   background: var(--bg-panel);
   border: 1px solid var(--border);
@@ -1833,6 +1973,52 @@ button {
 
   .print-checklist li.is-done .print-check-label {
     color: #333;
+  }
+
+  .print-signatures {
+    margin-top: 1.25rem;
+    padding-top: 0.75rem;
+    border-top: 0.6pt solid #bbb;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-sheet[data-print-profile='compact'] .print-signatures,
+  .print-sheet.is-print-compact .print-signatures {
+    margin-top: 0.75rem;
+    padding-top: 0.45rem;
+  }
+
+  .print-sig-line {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin: 0 0 0.85rem;
+    font-size: 10pt;
+    color: #000;
+  }
+
+  .print-sig-line:last-child {
+    margin-bottom: 0;
+  }
+
+  .print-sheet[data-print-profile='compact'] .print-sig-line,
+  .print-sheet.is-print-compact .print-sig-line {
+    margin-bottom: 0.55rem;
+    font-size: 9pt;
+  }
+
+  .print-sig-label {
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+
+  .print-sig-blank {
+    flex: 1;
+    min-width: 10rem;
+    border-bottom: 0.7pt solid #333;
+    height: 1.15em;
+    opacity: 1;
   }
 
   .print-sheet-footer {

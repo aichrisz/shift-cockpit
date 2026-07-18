@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Lang, PrintProfile, ShiftHandover } from '../types'
-import { t } from '../i18n'
+import { t, tf } from '../i18n'
 import { Checklist } from '../components/Checklist'
 import { TipSplit } from '../components/TipSplit'
 import { QuickChips } from '../components/QuickChips'
@@ -8,7 +8,8 @@ import { ConfirmDialog } from '../components/ConfirmDialog'
 import { PrintSheet } from '../components/PrintSheet'
 import { FinishShiftWizard } from '../components/FinishShiftWizard'
 import { appendChipLine } from '../data/chips'
-import { appendRoomLine } from '../lib/roomHelper'
+import { appendRoomLine, roomAlreadyListed } from '../lib/roomHelper'
+import { templateShiftLabel, type TemplateId } from '../data/templates'
 import {
   checklistToMarkdown,
   copyToClipboard,
@@ -48,6 +49,8 @@ function cloneDraft(h: ShiftHandover): ShiftHandover {
   return { ...h, checklist: h.checklist.map((c) => ({ ...c })) }
 }
 
+const SHIFT_CHIPS: TemplateId[] = ['frueh', 'spaet', 'nacht']
+
 export function Editor({
   lang,
   draft,
@@ -67,10 +70,11 @@ export function Editor({
 }: EditorProps) {
   const [roomInput, setRoomInput] = useState('')
   const [copyFlash, setCopyFlash] = useState<string | null>(null)
-  /** Full status line (share fallback etc.) — not prefixed with “Copied:”. */
+  /** Full status line (share fallback, room dup, etc.) — not prefixed with “Copied:”. */
   const [statusFlash, setStatusFlash] = useState<string | null>(null)
   const [leaveOpen, setLeaveOpen] = useState(false)
   const [wizardOpen, setWizardOpen] = useState(false)
+  const statusTimerRef = useRef<number | null>(null)
   const hasExistingTips =
     draft.tipTotal !== null ||
     draft.tipPeople !== null ||
@@ -99,14 +103,34 @@ export function Editor({
     onMarkReadyUndo?.(previous)
   }
 
+  function flashStatus(msg: string, ms = 2200) {
+    if (statusTimerRef.current != null) {
+      window.clearTimeout(statusTimerRef.current)
+    }
+    setStatusFlash(msg)
+    statusTimerRef.current = window.setTimeout(() => {
+      setStatusFlash(null)
+      statusTimerRef.current = null
+    }, ms)
+  }
+
   function handleRoomAdd() {
     const num = roomInput.trim()
     if (!num) {
       roomFieldRef.current?.focus()
       return
     }
+    if (roomAlreadyListed(draft.roomNotes, num)) {
+      flashStatus(tf(lang, 'roomDuplicate', { room: num }))
+      // Soft warn only — still append so staff can add a second note line if needed.
+    }
     patch({ roomNotes: appendRoomLine(draft.roomNotes, num, lang) })
     setRoomInput('')
+  }
+
+  function handleShiftChip(id: TemplateId) {
+    // Label only — do not change templateId (plan: optional light set of label).
+    patch({ shiftLabel: templateShiftLabel(id, lang) })
   }
 
   async function copySection(
@@ -265,16 +289,50 @@ export function Editor({
 
       <div className="editor-screen">
         <div className="field-grid">
-          <label className="field">
-            <span className="field-label">{t(lang, 'shiftLabel')}</span>
+          <div className="field">
+            <span className="field-label" id="shift-label-field">
+              {t(lang, 'shiftLabel')}
+            </span>
             <input
               type="text"
               className="input"
               value={draft.shiftLabel}
               placeholder={t(lang, 'shiftPlaceholder')}
+              aria-labelledby="shift-label-field"
               onChange={(e) => patch({ shiftLabel: e.target.value })}
             />
-          </label>
+            <div
+              className="shift-chip-row no-print"
+              role="group"
+              aria-label={t(lang, 'shiftLabelChips')}
+            >
+              {SHIFT_CHIPS.map((id) => {
+                const label = t(
+                  lang,
+                  id === 'frueh'
+                    ? 'templateFrueh'
+                    : id === 'spaet'
+                      ? 'templateSpaet'
+                      : 'templateNacht',
+                )
+                const full = templateShiftLabel(id, lang)
+                const active =
+                  draft.shiftLabel.trim().toLowerCase() === full.toLowerCase() ||
+                  draft.shiftLabel.trim().toLowerCase() === label.toLowerCase()
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`filter-chip shift-label-chip${active ? ' is-active' : ''}`}
+                    aria-pressed={active}
+                    onClick={() => handleShiftChip(id)}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
           <label className="field">
             <span className="field-label">{t(lang, 'date')}</span>
             <input

@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { AppData, Lang, PrintProfile, ShiftHandover } from '../types'
-import { t, tf } from '../i18n'
+import type { Lang, ShiftHandover } from '../types'
+import { t } from '../i18n'
 import { EmptyState } from '../components/EmptyState'
-import { Settings } from '../components/Settings'
 import { TemplatePicker, type CreateChoice } from '../components/TemplatePicker'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { ListSkeleton } from '../components/ListSkeleton'
@@ -16,38 +15,20 @@ import {
   filterIncompleteOnly,
   resolveContinueLastId,
 } from '../lib/incomplete'
-import {
-  downloadBackupJson,
-  formatBackupAt,
-  shouldNudgeBackup,
-} from '../lib/backup'
 
 interface ListProps {
   lang: Lang
   handovers: ShiftHandover[]
-  defaultShift: string
   lastTemplateId?: string
   pinnedId?: string | null
-  compactUi: boolean
-  haptics: boolean
-  printProfile: PrintProfile
-  lastBackupAt: string | null
-  appData: AppData
   /** True while first paint hydrates from storage. */
   booting?: boolean
-  onDefaultShiftChange: (value: string) => void
-  onCompactUiChange: (value: boolean) => void
-  onHapticsChange: (value: boolean) => void
-  onPrintProfileChange: (value: PrintProfile) => void
-  onBackupExported: () => void
-  onImportBackup: (data: AppData) => void
   onNew: (choice: CreateChoice) => void
   onOpen: (id: string) => void
   onDelete: (id: string) => void
   onDuplicate: (id: string) => void
   onPinToggle: (id: string) => void
   onLoadSample: () => void
-  onWipeOlder: (days: number) => number
 }
 
 function formatUpdated(iso: string, lang: Lang): string {
@@ -106,28 +87,15 @@ function ChecklistBadge({
 export function List({
   lang,
   handovers,
-  defaultShift,
   lastTemplateId,
   pinnedId,
-  compactUi,
-  haptics,
-  printProfile,
-  lastBackupAt,
-  appData,
   booting = false,
-  onDefaultShiftChange,
-  onCompactUiChange,
-  onHapticsChange,
-  onPrintProfileChange,
-  onBackupExported,
-  onImportBackup,
   onNew,
   onOpen,
   onDelete,
   onDuplicate,
   onPinToggle,
   onLoadSample,
-  onWipeOlder,
 }: ListProps) {
   const [picking, setPicking] = useState(false)
   const [filter, setFilter] = useState<HistoryFilter>(() =>
@@ -215,8 +183,6 @@ export function List({
 
   const searchActive = search.trim().length > 0
   const filterActive = filter !== 'all'
-  const showBackupNudge = shouldNudgeBackup(lastBackupAt)
-  const backupWhen = formatBackupAt(lastBackupAt, lang)
 
   function emptyKind(): 'search' | 'incomplete' | 'filter' {
     if (searchActive) return 'search'
@@ -270,27 +236,6 @@ export function List({
               {t(lang, 'loadSample')}
             </button>
           </div>
-
-          {showBackupNudge && (
-            <div className="backup-nudge no-print" role="status">
-              <p className="backup-nudge-text">
-                {t(lang, 'backupNudge')}
-                {backupWhen
-                  ? ` · ${tf(lang, 'backupLast', { when: backupWhen })}`
-                  : ` · ${t(lang, 'backupNever')}`}
-              </p>
-              <button
-                type="button"
-                className="btn btn-ghost btn-compact"
-                onClick={() => {
-                  downloadBackupJson(appData)
-                  onBackupExported()
-                }}
-              >
-                {t(lang, 'backupExport')}
-              </button>
-            </div>
-          )}
 
           <label className="search-field no-print">
             <span className="visually-hidden">{t(lang, 'search')}</span>
@@ -430,24 +375,6 @@ export function List({
           )}
         </>
       )}
-
-      <Settings
-        lang={lang}
-        defaultShift={defaultShift}
-        compactUi={compactUi}
-        haptics={haptics}
-        printProfile={printProfile}
-        lastBackupAt={lastBackupAt}
-        appData={appData}
-        onDefaultShiftChange={onDefaultShiftChange}
-        onCompactUiChange={onCompactUiChange}
-        onHapticsChange={onHapticsChange}
-        onPrintProfileChange={onPrintProfileChange}
-        onBackupExported={onBackupExported}
-        onImportBackup={onImportBackup}
-        handovers={handovers}
-        onWipeOlder={onWipeOlder}
-      />
     </div>
   )
 }

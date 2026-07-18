@@ -129,6 +129,17 @@ export function PrintSheet({
         </section>
       )}
 
+      <section className="print-section print-signatures" aria-label={t(lang, 'printSignatures')}>
+        <p className="print-sig-line">
+          <span className="print-sig-label">{t(lang, 'handedOverBy')}</span>
+          <span className="print-sig-blank" aria-hidden="true" />
+        </p>
+        <p className="print-sig-line">
+          <span className="print-sig-label">{t(lang, 'takenOverBy')}</span>
+          <span className="print-sig-blank" aria-hidden="true" />
+        </p>
+      </section>
+
       <footer className="print-sheet-footer">
         {t(lang, 'printedAt')} {stamp} · {t(lang, 'appTitle')}
       </footer>

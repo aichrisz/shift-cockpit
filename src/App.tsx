@@ -7,6 +7,7 @@ import { UndoToast } from './components/UndoToast'
 import { List } from './pages/List'
 import { Editor } from './pages/Editor'
 import { Export } from './pages/Export'
+import { SettingsPage } from './pages/SettingsPage'
 import { loadAppData, saveAppData, filterKeepRecent, countOlderThan } from './lib/storage'
 import { createId } from './lib/id'
 import { createPresetChecklist } from './data/presets'
@@ -467,41 +468,57 @@ export default function App() {
   const viewKey =
     view.name === 'list'
       ? 'list'
-      : view.name === 'editor'
-        ? `editor-${view.id ?? 'new'}`
-        : `export-${view.id}`
+      : view.name === 'settings'
+        ? 'settings'
+        : view.name === 'editor'
+          ? `editor-${view.id ?? 'new'}`
+          : `export-${view.id}`
 
   return (
     <div className={`app-shell${compactUi ? ' is-compact' : ''}`} data-compact={compactUi || undefined}>
-      <Header lang={lang} onLangChange={setLang} />
+      <Header
+        lang={lang}
+        view={view}
+        onLangChange={setLang}
+        onOpenSettings={() => setView({ name: 'settings' })}
+        onBackFromSettings={() => setView({ name: 'list' })}
+      />
       <main className="app-main">
         <div key={viewKey} className="view-root">
           {view.name === 'list' && (
             <List
               lang={lang}
               handovers={data.handovers}
-              defaultShift={data.settings.defaultShift}
               lastTemplateId={data.settings.lastTemplateId}
               pinnedId={pinnedId}
-              compactUi={compactUi}
-              haptics={haptics}
-              printProfile={printProfile}
-              lastBackupAt={lastBackupAt}
-              appData={data}
               booting={booting}
-              onDefaultShiftChange={setDefaultShift}
-              onCompactUiChange={setCompactUi}
-              onHapticsChange={setHaptics}
-              onPrintProfileChange={setPrintProfile}
-              onBackupExported={handleBackupExported}
-              onImportBackup={handleImportBackup}
               onNew={handleNew}
               onOpen={(id) => openEditor(id)}
               onDelete={handleDelete}
               onDuplicate={handleDuplicate}
               onPinToggle={handlePinToggle}
               onLoadSample={handleLoadSample}
+            />
+          )}
+
+          {view.name === 'settings' && (
+            <SettingsPage
+              lang={lang}
+              defaultShift={data.settings.defaultShift}
+              compactUi={compactUi}
+              haptics={haptics}
+              printProfile={printProfile}
+              lastBackupAt={lastBackupAt}
+              appData={data}
+              handovers={data.handovers}
+              onDefaultShiftChange={setDefaultShift}
+              onCompactUiChange={setCompactUi}
+              onHapticsChange={setHaptics}
+              onPrintProfileChange={setPrintProfile}
+              onBackupExported={handleBackupExported}
+              onImportBackup={handleImportBackup}
               onWipeOlder={handleWipeOlder}
+              onBack={() => setView({ name: 'list' })}
             />
           )}
 

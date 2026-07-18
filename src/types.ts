@@ -55,3 +55,4 @@ export type View =
   | { name: 'list' }
   | { name: 'editor'; id: string | null }
   | { name: 'export'; id: string }
+  | { name: 'settings' }
