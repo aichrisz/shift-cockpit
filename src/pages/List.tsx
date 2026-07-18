@@ -4,11 +4,14 @@ import { t } from '../i18n'
 import { EmptyState } from '../components/EmptyState'
 import { Settings } from '../components/Settings'
 import { TemplatePicker, type CreateChoice } from '../components/TemplatePicker'
+import { ConfirmDialog } from '../components/ConfirmDialog'
+import { ListSkeleton } from '../components/ListSkeleton'
 import {
   defaultHistoryFilter,
   filterHandoversByDate,
   type HistoryFilter,
 } from '../lib/historyFilter'
+import { filterHandoversBySearch } from '../lib/listSearch'
 
 interface ListProps {
   lang: Lang
@@ -16,7 +19,11 @@ interface ListProps {
   defaultShift: string
   lastTemplateId?: string
   pinnedId?: string | null
+  compactUi: boolean
+  /** True while first paint hydrates from storage. */
+  booting?: boolean
   onDefaultShiftChange: (value: string) => void
+  onCompactUiChange: (value: boolean) => void
   onNew: (choice: CreateChoice) => void
   onOpen: (id: string) => void
   onDelete: (id: string) => void
@@ -38,13 +45,49 @@ function formatUpdated(iso: string, lang: Lang): string {
   }
 }
 
+function ChecklistBadge({
+  lang,
+  done,
+  total,
+}: {
+  lang: Lang
+  done: number
+  total: number
+}) {
+  if (total <= 0) return null
+  const complete = done >= total
+  return (
+    <span
+      className={`checklist-badge${complete ? ' is-complete' : ' is-open'}`}
+      title={complete ? t(lang, 'checklistComplete') : t(lang, 'checklistOpen')}
+    >
+      {complete ? (
+        <>
+          <span className="checklist-badge-check" aria-hidden="true">
+            ✓
+          </span>
+          {done}/{total}
+        </>
+      ) : (
+        <>
+          {done}/{total}
+          <span className="checklist-badge-label">{t(lang, 'checklistOpen')}</span>
+        </>
+      )}
+    </span>
+  )
+}
+
 export function List({
   lang,
   handovers,
   defaultShift,
   lastTemplateId,
   pinnedId,
+  compactUi,
+  booting = false,
   onDefaultShiftChange,
+  onCompactUiChange,
   onNew,
   onOpen,
   onDelete,
@@ -57,11 +100,13 @@ export function List({
   const [filter, setFilter] = useState<HistoryFilter>(() =>
     defaultHistoryFilter(handovers),
   )
+  const [search, setSearch] = useState('')
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  const filtered = useMemo(
-    () => filterHandoversByDate(handovers, filter),
-    [handovers, filter],
-  )
+  const filtered = useMemo(() => {
+    const byDate = filterHandoversByDate(handovers, filter)
+    return filterHandoversBySearch(byDate, search)
+  }, [handovers, filter, search])
 
   const sorted = useMemo(() => {
     const list = [...filtered].sort(
@@ -83,6 +128,14 @@ export function List({
     onNew(choice)
   }
 
+  if (booting) {
+    return (
+      <div className="list-page">
+        <ListSkeleton />
+      </div>
+    )
+  }
+
   return (
     <div className="list-page">
       {picking && (
@@ -93,6 +146,20 @@ export function List({
           onCancel={() => setPicking(false)}
         />
       )}
+
+      <ConfirmDialog
+        lang={lang}
+        open={deleteId !== null}
+        title={t(lang, 'confirmDelete')}
+        body={t(lang, 'deleteConfirm')}
+        confirmLabel={t(lang, 'delete')}
+        destructive
+        onCancel={() => setDeleteId(null)}
+        onConfirm={() => {
+          if (deleteId) onDelete(deleteId)
+          setDeleteId(null)
+        }}
+      />
 
       {handovers.length === 0 ? (
         <EmptyState lang={lang} onNew={startNew} onLoadSample={onLoadSample} />
@@ -106,6 +173,19 @@ export function List({
               {t(lang, 'loadSample')}
             </button>
           </div>
+
+          <label className="search-field no-print">
+            <span className="visually-hidden">{t(lang, 'search')}</span>
+            <input
+              type="search"
+              className="input search-input"
+              value={search}
+              placeholder={t(lang, 'searchPh')}
+              autoComplete="off"
+              enterKeyHint="search"
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </label>
 
           <div
             className="filter-row no-print"
@@ -133,14 +213,28 @@ export function List({
 
           {sorted.length === 0 ? (
             <div className="filter-empty" role="status">
-              <p>{t(lang, 'filterEmpty')}</p>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setFilter('all')}
-              >
-                {t(lang, 'filterShowAll')}
-              </button>
+              <p>
+                {search.trim()
+                  ? t(lang, 'searchEmpty')
+                  : t(lang, 'filterEmpty')}
+              </p>
+              {search.trim() ? (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setSearch('')}
+                >
+                  {t(lang, 'filterShowAll')}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setFilter('all')}
+                >
+                  {t(lang, 'filterShowAll')}
+                </button>
+              )}
             </div>
           ) : (
             <ul className="handover-list" role="list">
@@ -158,15 +252,22 @@ export function List({
                       className="handover-main"
                       onClick={() => onOpen(h.id)}
                     >
-                      <span className="handover-title">
-                        {isPinned && (
-                          <span className="active-badge">{t(lang, 'activeBadge')}</span>
-                        )}
-                        {h.shiftLabel || t(lang, 'shiftLabel')} · {h.date}
+                      <span className="handover-title-row">
+                        <span className="handover-title">
+                          {isPinned && (
+                            <span className="active-badge">
+                              {t(lang, 'activeBadge')}
+                            </span>
+                          )}
+                          {h.shiftLabel || t(lang, 'shiftLabel')} · {h.date}
+                        </span>
+                        <ChecklistBadge lang={lang} done={done} total={total} />
                       </span>
                       <span className="handover-meta">
                         {t(lang, 'updated')}: {formatUpdated(h.updatedAt, lang)}
-                        {total > 0 ? ` · ${done}/${total} ${t(lang, 'doneCount')}` : ''}
+                        {total > 0
+                          ? ` · ${done}/${total} ${t(lang, 'doneCount')}`
+                          : ''}
                       </span>
                     </button>
                     <div className="handover-actions no-print">
@@ -187,11 +288,7 @@ export function List({
                       <button
                         type="button"
                         className="btn btn-danger-ghost"
-                        onClick={() => {
-                          if (window.confirm(t(lang, 'deleteConfirm'))) {
-                            onDelete(h.id)
-                          }
-                        }}
+                        onClick={() => setDeleteId(h.id)}
                       >
                         {t(lang, 'delete')}
                       </button>
@@ -207,7 +304,9 @@ export function List({
       <Settings
         lang={lang}
         defaultShift={defaultShift}
+        compactUi={compactUi}
         onDefaultShiftChange={onDefaultShiftChange}
+        onCompactUiChange={onCompactUiChange}
         handovers={handovers}
         onWipeOlder={onWipeOlder}
       />

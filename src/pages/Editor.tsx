@@ -4,9 +4,11 @@ import { t } from '../i18n'
 import { Checklist } from '../components/Checklist'
 import { TipSplit } from '../components/TipSplit'
 import { QuickChips } from '../components/QuickChips'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { appendChipLine } from '../data/chips'
 import { appendRoomLine } from '../lib/roomHelper'
 import { checklistToMarkdown, copyToClipboard } from '../lib/exportMd'
+import { applyHandoverReady } from '../lib/markReady'
 
 interface EditorProps {
   lang: Lang
@@ -35,6 +37,7 @@ export function Editor({
 }: EditorProps) {
   const [roomInput, setRoomInput] = useState('')
   const [copyFlash, setCopyFlash] = useState<string | null>(null)
+  const [leaveOpen, setLeaveOpen] = useState(false)
   const hasExistingTips =
     draft.tipTotal !== null ||
     draft.tipPeople !== null ||
@@ -48,9 +51,14 @@ export function Editor({
 
   function handleBack() {
     if (dirty) {
-      if (!window.confirm(t(lang, 'dirtyLeaveConfirm'))) return
+      setLeaveOpen(true)
+      return
     }
     onBack()
+  }
+
+  function handleMarkReady() {
+    onChange(applyHandoverReady(draft, lang))
   }
 
   function handleRoomAdd() {
@@ -63,11 +71,10 @@ export function Editor({
     setRoomInput('')
   }
 
-  async function copySection(text: string, labelKey: 'copyOpen' | 'copyRoom' | 'copyGuest' | 'copyChecklist') {
-    const body = text.trim()
-    if (!body) {
-      // Still allow copy of empty → user gets empty clipboard less useful; copy as-is
-    }
+  async function copySection(
+    text: string,
+    labelKey: 'copyOpen' | 'copyRoom' | 'copyGuest' | 'copyChecklist',
+  ) {
     const ok = await copyToClipboard(text)
     if (ok) {
       setCopyFlash(t(lang, labelKey))
@@ -77,6 +84,20 @@ export function Editor({
 
   return (
     <div className="editor-page">
+      <ConfirmDialog
+        lang={lang}
+        open={leaveOpen}
+        title={t(lang, 'leaveTitle')}
+        body={t(lang, 'dirtyLeaveConfirm')}
+        confirmLabel={t(lang, 'confirm')}
+        destructive
+        onCancel={() => setLeaveOpen(false)}
+        onConfirm={() => {
+          setLeaveOpen(false)
+          onBack()
+        }}
+      />
+
       <div className="editor-toolbar no-print">
         <button type="button" className="btn btn-ghost" onClick={handleBack}>
           {t(lang, 'back')}
@@ -104,6 +125,12 @@ export function Editor({
             {t(lang, 'save')}
           </button>
         </div>
+      </div>
+
+      <div className="ready-row no-print">
+        <button type="button" className="btn btn-ready" onClick={handleMarkReady}>
+          {t(lang, 'markReady')}
+        </button>
       </div>
 
       {copyFlash && (
@@ -156,7 +183,10 @@ export function Editor({
         </div>
         <QuickChips
           lang={lang}
-          onPick={(phrase) => patch({ openPoints: appendChipLine(draft.openPoints, phrase) })}
+          templateId={draft.templateId}
+          onPick={(phrase) =>
+            patch({ openPoints: appendChipLine(draft.openPoints, phrase) })
+          }
         />
         <textarea
           className="input textarea"
@@ -228,7 +258,10 @@ export function Editor({
         </div>
         <QuickChips
           lang={lang}
-          onPick={(phrase) => patch({ guestNotes: appendChipLine(draft.guestNotes, phrase) })}
+          templateId={draft.templateId}
+          onPick={(phrase) =>
+            patch({ guestNotes: appendChipLine(draft.guestNotes, phrase) })
+          }
         />
         <textarea
           className="input textarea"

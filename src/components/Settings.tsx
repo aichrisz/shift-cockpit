@@ -2,11 +2,14 @@ import { useMemo, useState } from 'react'
 import type { Lang, ShiftHandover } from '../types'
 import { t, tf } from '../i18n'
 import { countOlderThan } from '../lib/storage'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface SettingsProps {
   lang: Lang
   defaultShift: string
+  compactUi: boolean
   onDefaultShiftChange: (value: string) => void
+  onCompactUiChange: (value: boolean) => void
   handovers: ShiftHandover[]
   onWipeOlder: (days: number) => number
 }
@@ -23,12 +26,15 @@ function clampDays(n: number): number {
 export function Settings({
   lang,
   defaultShift,
+  compactUi,
   onDefaultShiftChange,
+  onCompactUiChange,
   handovers,
   onWipeOlder,
 }: SettingsProps) {
   const [days, setDays] = useState(DEFAULT_DAYS)
   const [status, setStatus] = useState<string | null>(null)
+  const [wipeOpen, setWipeOpen] = useState(false)
 
   const safeDays = clampDays(days)
   const olderCount = useMemo(
@@ -36,20 +42,34 @@ export function Settings({
     [handovers, safeDays],
   )
 
-  function handleWipe() {
+  function handleWipeClick() {
     const n = countOlderThan(handovers, safeDays)
     if (n === 0) {
       setStatus(t(lang, 'wipeNone'))
       return
     }
-    const ok = window.confirm(tf(lang, 'wipeConfirm', { n, d: safeDays }))
-    if (!ok) return
+    setWipeOpen(true)
+  }
+
+  function confirmWipe() {
     const removed = onWipeOlder(safeDays)
     setStatus(tf(lang, 'wipeDone', { n: removed }))
+    setWipeOpen(false)
   }
 
   return (
     <section className="settings-panel" aria-labelledby="settings-heading">
+      <ConfirmDialog
+        lang={lang}
+        open={wipeOpen}
+        title={t(lang, 'wipeTitle')}
+        body={tf(lang, 'wipeConfirm', { n: olderCount, d: safeDays })}
+        confirmLabel={t(lang, 'delete')}
+        destructive
+        onCancel={() => setWipeOpen(false)}
+        onConfirm={confirmWipe}
+      />
+
       <h2 id="settings-heading" className="panel-title">
         {t(lang, 'settings')}
       </h2>
@@ -63,6 +83,20 @@ export function Settings({
           onChange={(e) => onDefaultShiftChange(e.target.value)}
           autoComplete="off"
         />
+      </label>
+
+      <label className="settings-toggle">
+        <input
+          type="checkbox"
+          checked={compactUi}
+          onChange={(e) => onCompactUiChange(e.target.checked)}
+        />
+        <span>
+          <span className="settings-toggle-label">{t(lang, 'compactUi')}</span>
+          <span className="settings-hint settings-toggle-hint">
+            {t(lang, 'compactUiHint')}
+          </span>
+        </span>
       </label>
 
       <div className="settings-wipe">
@@ -87,7 +121,7 @@ export function Settings({
         <button
           type="button"
           className="btn btn-danger-outline"
-          onClick={handleWipe}
+          onClick={handleWipeClick}
           disabled={olderCount === 0}
         >
           {t(lang, 'wipeOlder')}

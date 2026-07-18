@@ -1,4 +1,5 @@
 import type { Lang } from '../types'
+import type { TemplateId } from './templates'
 
 /** Stable chip ids for open-point / guest-note quick phrases. */
 export type ChipId =
@@ -12,13 +13,19 @@ export type ChipId =
   | 'wakeUp'
   | 'taxi'
   | 'groupArrival'
+  | 'lateCheckout'
+  | 'noShow'
+  | 'quietHours'
+  | 'nightAudit'
+  | 'security'
+  | 'arrivals'
 
 export interface QuickChip {
   id: ChipId
   labels: Record<Lang, string>
 }
 
-/** ~10 DE-primary handover phrases with EN/ID labels. */
+/** Full chip catalog (DE-primary, EN/ID labels). */
 export const QUICK_CHIPS: QuickChip[] = [
   {
     id: 'cashOpen',
@@ -100,7 +107,120 @@ export const QUICK_CHIPS: QuickChip[] = [
       id: 'Kedatangan grup',
     },
   },
+  {
+    id: 'lateCheckout',
+    labels: {
+      de: 'Late Checkout genehmigt',
+      en: 'Late checkout approved',
+      id: 'Late checkout disetujui',
+    },
+  },
+  {
+    id: 'noShow',
+    labels: {
+      de: 'No-Show notiert',
+      en: 'No-show noted',
+      id: 'No-show dicatat',
+    },
+  },
+  {
+    id: 'quietHours',
+    labels: {
+      de: 'Ruhezeiten / Lärm',
+      en: 'Quiet hours / noise',
+      id: 'Jam tenang / bising',
+    },
+  },
+  {
+    id: 'nightAudit',
+    labels: {
+      de: 'Night Audit erledigt',
+      en: 'Night audit done',
+      id: 'Night audit selesai',
+    },
+  },
+  {
+    id: 'security',
+    labels: {
+      de: 'Sicherheit / Türen geprüft',
+      en: 'Security / doors checked',
+      id: 'Keamanan / pintu dicek',
+    },
+  },
+  {
+    id: 'arrivals',
+    labels: {
+      de: 'Anreisen geprüft',
+      en: 'Arrivals checked',
+      id: 'Kedatangan dicek',
+    },
+  },
 ]
+
+/** Curated primary chips per template (6–8); blank uses a general set. */
+const TEMPLATE_CHIP_IDS: Record<TemplateId | 'blank', ChipId[]> = {
+  blank: [
+    'cashOpen',
+    'vip',
+    'complaint',
+    'lateArrival',
+    'keyMissing',
+    'maintenance',
+    'breakfast',
+    'wakeUp',
+  ],
+  frueh: [
+    'breakfast',
+    'wakeUp',
+    'lateCheckout',
+    'cashOpen',
+    'vip',
+    'taxi',
+    'maintenance',
+    'complaint',
+  ],
+  spaet: [
+    'arrivals',
+    'noShow',
+    'keyMissing',
+    'groupArrival',
+    'lateArrival',
+    'complaint',
+    'cashOpen',
+    'vip',
+  ],
+  nacht: [
+    'quietHours',
+    'nightAudit',
+    'lateArrival',
+    'security',
+    'cashOpen',
+    'complaint',
+    'keyMissing',
+    'vip',
+  ],
+}
+
+function chipById(id: ChipId): QuickChip | undefined {
+  return QUICK_CHIPS.find((c) => c.id === id)
+}
+
+/** Primary chips for a template (or blank). */
+export function chipsForTemplate(templateId?: string | null): QuickChip[] {
+  const key: TemplateId | 'blank' =
+    templateId === 'frueh' || templateId === 'spaet' || templateId === 'nacht'
+      ? templateId
+      : 'blank'
+  return TEMPLATE_CHIP_IDS[key]
+    .map(chipById)
+    .filter((c): c is QuickChip => c !== undefined)
+}
+
+/** Remaining chips not in the primary set (for “More”). */
+export function chipsMoreThan(templateId?: string | null): QuickChip[] {
+  const primary = new Set(chipsForTemplate(templateId).map((c) => c.id))
+  return QUICK_CHIPS.filter((c) => !primary.has(c.id))
+}
 
 /** Normalize a phrase to a markdown bullet line (`- text`). */
 export function asBulletLine(phrase: string): string {

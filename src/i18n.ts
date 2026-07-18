@@ -81,6 +81,21 @@ export type MessageKey =
   | 'copyGuest'
   | 'copyChecklist'
   | 'dirtyLeaveConfirm'
+  | 'search'
+  | 'searchPh'
+  | 'searchEmpty'
+  | 'checklistOpen'
+  | 'checklistComplete'
+  | 'markReady'
+  | 'readyPhrase'
+  | 'chipsMore'
+  | 'chipsLess'
+  | 'compactUi'
+  | 'compactUiHint'
+  | 'confirm'
+  | 'confirmTitle'
+  | 'wipeTitle'
+  | 'leaveTitle'
 
 const de: Record<MessageKey, string> = {
   appTitle: 'Shift Cockpit',
@@ -163,6 +178,21 @@ const de: Record<MessageKey, string> = {
   copyGuest: 'Gäste',
   copyChecklist: 'Checkliste',
   dirtyLeaveConfirm: 'Ungespeicherte Änderungen verwerfen?',
+  search: 'Suche',
+  searchPh: 'Übergaben durchsuchen…',
+  searchEmpty: 'Keine Treffer für diese Suche.',
+  checklistOpen: 'Offen',
+  checklistComplete: 'Fertig',
+  markReady: 'Übergabe bereit',
+  readyPhrase: 'Übergabe bereit',
+  chipsMore: 'Mehr',
+  chipsLess: 'Weniger',
+  compactUi: 'Kompakte Ansicht',
+  compactUiHint: 'Weniger Abstand und dichtere Karten auf dem Handy.',
+  confirm: 'Bestätigen',
+  confirmTitle: 'Bestätigen',
+  wipeTitle: 'Ältere löschen',
+  leaveTitle: 'Verlassen?',
 }
 
 const en: Record<MessageKey, string> = {
@@ -246,6 +276,21 @@ const en: Record<MessageKey, string> = {
   copyGuest: 'Guests',
   copyChecklist: 'Checklist',
   dirtyLeaveConfirm: 'Discard unsaved changes?',
+  search: 'Search',
+  searchPh: 'Search handovers…',
+  searchEmpty: 'No matches for this search.',
+  checklistOpen: 'Open',
+  checklistComplete: 'Done',
+  markReady: 'Handover ready',
+  readyPhrase: 'Handover ready',
+  chipsMore: 'More',
+  chipsLess: 'Less',
+  compactUi: 'Compact layout',
+  compactUiHint: 'Tighter spacing and denser cards on phone.',
+  confirm: 'Confirm',
+  confirmTitle: 'Confirm',
+  wipeTitle: 'Delete older',
+  leaveTitle: 'Leave?',
 }
 
 const id: Record<MessageKey, string> = {
@@ -329,6 +374,21 @@ const id: Record<MessageKey, string> = {
   copyGuest: 'Tamu',
   copyChecklist: 'Checklist',
   dirtyLeaveConfirm: 'Buang perubahan yang belum disimpan?',
+  search: 'Cari',
+  searchPh: 'Cari serah terima…',
+  searchEmpty: 'Tidak ada hasil untuk pencarian ini.',
+  checklistOpen: 'Terbuka',
+  checklistComplete: 'Selesai',
+  markReady: 'Serah terima siap',
+  readyPhrase: 'Serah terima siap',
+  chipsMore: 'Lainnya',
+  chipsLess: 'Sedikit',
+  compactUi: 'Tampilan ringkas',
+  compactUiHint: 'Jarak lebih rapat dan kartu lebih padat di HP.',
+  confirm: 'Konfirmasi',
+  confirmTitle: 'Konfirmasi',
+  wipeTitle: 'Hapus yang lama',
+  leaveTitle: 'Keluar?',
 }
 
 const catalogs: Record<Lang, Record<MessageKey, string>> = { de, en, id }

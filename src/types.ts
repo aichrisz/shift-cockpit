@@ -20,6 +20,8 @@ export interface ShiftHandover {
   tipPeople: number | null
   tipNote: string
   lang: Lang
+  /** Template used at create (`frueh` | `nacht` | `spaet`); blank/legacy omit. */
+  templateId?: string
 }
 
 export interface Settings {
@@ -29,6 +31,8 @@ export interface Settings {
   lastTemplateId?: string
   /** Single pinned “active now” handover id, if still present. */
   pinnedId?: string | null
+  /** Denser phone layout (padding/gaps). Default false. */
+  compactUi?: boolean
 }
 
 export interface AppData {

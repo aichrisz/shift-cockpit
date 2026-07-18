@@ -8,6 +8,7 @@ const DEFAULT_SETTINGS: Settings = {
   lang: 'de',
   defaultShift: '',
   pinnedId: null,
+  compactUi: false,
 }
 
 export function defaultAppData(): AppData {
@@ -47,6 +48,8 @@ function sanitizeHandover(raw: unknown): ShiftHandover | null {
   const lang =
     raw.lang === 'en' || raw.lang === 'id' || raw.lang === 'de' ? raw.lang : 'de'
 
+  const templateId = normalizeTemplateId(raw.templateId)
+
   return {
     id: raw.id,
     createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : new Date().toISOString(),
@@ -61,6 +64,7 @@ function sanitizeHandover(raw: unknown): ShiftHandover | null {
     tipPeople,
     tipNote: typeof raw.tipNote === 'string' ? raw.tipNote : '',
     lang,
+    ...(templateId ? { templateId } : {}),
   }
 }
 
@@ -94,6 +98,8 @@ export function loadAppData(): AppData {
     const pinnedResolved =
       pinnedId && handovers.some((h) => h.id === pinnedId) ? pinnedId : null
 
+    const compactUi = settingsRaw.compactUi === true
+
     return {
       version: 1,
       settings: {
@@ -104,6 +110,7 @@ export function loadAppData(): AppData {
             : DEFAULT_SETTINGS.defaultShift,
         ...(lastTemplateId ? { lastTemplateId } : {}),
         pinnedId: pinnedResolved,
+        compactUi,
       },
       handovers,
     }

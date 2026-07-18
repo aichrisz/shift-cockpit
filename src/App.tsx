@@ -58,6 +58,7 @@ function createFromTemplate(
     tipPeople: null,
     tipNote: '',
     lang,
+    templateId,
   }
 }
 
@@ -89,13 +90,33 @@ export default function App() {
   /** Baseline for dirty detection — set when draft is loaded/created/saved. */
   const baselineRef = useRef<ShiftHandover | null>(null)
   const [baselineKey, setBaselineKey] = useState('')
+  /** Brief boot so list can show skeleton for one paint after hydrate. */
+  const [booting, setBooting] = useState(true)
 
   useEffect(() => {
     saveAppData(data)
   }, [data])
 
+  useEffect(() => {
+    // Prefer one paint of skeleton even when load is sync.
+    const id = window.requestAnimationFrame(() => {
+      setBooting(false)
+    })
+    return () => window.cancelAnimationFrame(id)
+  }, [])
+
   const lang = data.settings.lang
   const pinnedId = data.settings.pinnedId ?? null
+  const compactUi = data.settings.compactUi === true
+
+  useEffect(() => {
+    const root = document.documentElement
+    if (compactUi) {
+      root.setAttribute('data-compact', 'true')
+    } else {
+      root.removeAttribute('data-compact')
+    }
+  }, [compactUi])
 
   const setBaseline = useCallback((h: ShiftHandover | null) => {
     baselineRef.current = h ? cloneDraft(h) : null
@@ -122,18 +143,22 @@ export default function App() {
     }))
   }, [])
 
-  const handlePinToggle = useCallback(
-    (id: string) => {
-      setData((prev) => ({
-        ...prev,
-        settings: {
-          ...prev.settings,
-          pinnedId: prev.settings.pinnedId === id ? null : id,
-        },
-      }))
-    },
-    [],
-  )
+  const setCompactUi = useCallback((value: boolean) => {
+    setData((prev) => ({
+      ...prev,
+      settings: { ...prev.settings, compactUi: value },
+    }))
+  }, [])
+
+  const handlePinToggle = useCallback((id: string) => {
+    setData((prev) => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        pinnedId: prev.settings.pinnedId === id ? null : id,
+      },
+    }))
+  }, [])
 
   const openEditor = useCallback(
     (id: string) => {
@@ -290,61 +315,73 @@ export default function App() {
         : data.handovers.find((h) => h.id === view.id) ?? null
       : null
 
+  const viewKey =
+    view.name === 'list'
+      ? 'list'
+      : view.name === 'editor'
+        ? `editor-${view.id ?? 'new'}`
+        : `export-${view.id}`
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell${compactUi ? ' is-compact' : ''}`} data-compact={compactUi || undefined}>
       <Header lang={lang} onLangChange={setLang} />
       <main className="app-main">
-        {view.name === 'list' && (
-          <List
-            lang={lang}
-            handovers={data.handovers}
-            defaultShift={data.settings.defaultShift}
-            lastTemplateId={data.settings.lastTemplateId}
-            pinnedId={pinnedId}
-            onDefaultShiftChange={setDefaultShift}
-            onNew={handleNew}
-            onOpen={(id) => openEditor(id)}
-            onDelete={handleDelete}
-            onDuplicate={handleDuplicate}
-            onPinToggle={handlePinToggle}
-            onLoadSample={handleLoadSample}
-            onWipeOlder={handleWipeOlder}
-          />
-        )}
+        <div key={viewKey} className="view-root">
+          {view.name === 'list' && (
+            <List
+              lang={lang}
+              handovers={data.handovers}
+              defaultShift={data.settings.defaultShift}
+              lastTemplateId={data.settings.lastTemplateId}
+              pinnedId={pinnedId}
+              compactUi={compactUi}
+              booting={booting}
+              onDefaultShiftChange={setDefaultShift}
+              onCompactUiChange={setCompactUi}
+              onNew={handleNew}
+              onOpen={(id) => openEditor(id)}
+              onDelete={handleDelete}
+              onDuplicate={handleDuplicate}
+              onPinToggle={handlePinToggle}
+              onLoadSample={handleLoadSample}
+              onWipeOlder={handleWipeOlder}
+            />
+          )}
 
-        {view.name === 'editor' && draft && (
-          <Editor
-            lang={lang}
-            draft={draft}
-            dirty={dirty}
-            pinned={pinnedId === draft.id}
-            onChange={setDraft}
-            onSave={handleSave}
-            onExport={handleExport}
-            onDuplicate={handleDuplicateDraft}
-            onPinToggle={
-              // Only pin handovers already in storage (avoid orphan pinnedId).
-              data.handovers.some((h) => h.id === draft.id)
-                ? handlePinFromEditor
-                : undefined
-            }
-            onBack={handleEditorBack}
-          />
-        )}
-
-        {view.name === 'export' && exportHandover && (
-          <Export
-            lang={lang}
-            handover={exportHandover}
-            onBack={() => {
-              if (draft) {
-                setView({ name: 'editor', id: draft.id })
-              } else {
-                setView({ name: 'list' })
+          {view.name === 'editor' && draft && (
+            <Editor
+              lang={lang}
+              draft={draft}
+              dirty={dirty}
+              pinned={pinnedId === draft.id}
+              onChange={setDraft}
+              onSave={handleSave}
+              onExport={handleExport}
+              onDuplicate={handleDuplicateDraft}
+              onPinToggle={
+                // Only pin handovers already in storage (avoid orphan pinnedId).
+                data.handovers.some((h) => h.id === draft.id)
+                  ? handlePinFromEditor
+                  : undefined
               }
-            }}
-          />
-        )}
+              onBack={handleEditorBack}
+            />
+          )}
+
+          {view.name === 'export' && exportHandover && (
+            <Export
+              lang={lang}
+              handover={exportHandover}
+              onBack={() => {
+                if (draft) {
+                  setView({ name: 'editor', id: draft.id })
+                } else {
+                  setView({ name: 'list' })
+                }
+              }}
+            />
+          )}
+        </div>
       </main>
     </div>
   )
