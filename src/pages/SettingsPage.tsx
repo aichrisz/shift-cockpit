@@ -1,11 +1,19 @@
 import { useEffect } from 'react'
-import type { AppData, Lang, PrintProfile, ShiftHandover } from '../types'
+import type {
+  AppData,
+  DefaultTemplateId,
+  Lang,
+  PrintProfile,
+  ShiftHandover,
+} from '../types'
 import { t } from '../i18n'
 import { Settings } from '../components/Settings'
 
 interface SettingsPageProps {
   lang: Lang
   defaultShift: string
+  defaultTemplateId: DefaultTemplateId | null
+  printHotelLine: string
   compactUi: boolean
   haptics: boolean
   printProfile: PrintProfile
@@ -13,6 +21,8 @@ interface SettingsPageProps {
   appData: AppData
   handovers: ShiftHandover[]
   onDefaultShiftChange: (value: string) => void
+  onDefaultTemplateIdChange: (value: DefaultTemplateId | null) => void
+  onPrintHotelLineChange: (value: string) => void
   onCompactUiChange: (value: boolean) => void
   onHapticsChange: (value: boolean) => void
   onPrintProfileChange: (value: PrintProfile) => void
@@ -25,6 +35,8 @@ interface SettingsPageProps {
 export function SettingsPage({
   lang,
   defaultShift,
+  defaultTemplateId,
+  printHotelLine,
   compactUi,
   haptics,
   printProfile,
@@ -32,6 +44,8 @@ export function SettingsPage({
   appData,
   handovers,
   onDefaultShiftChange,
+  onDefaultTemplateIdChange,
+  onPrintHotelLineChange,
   onCompactUiChange,
   onHapticsChange,
   onPrintProfileChange,
@@ -69,12 +83,16 @@ export function SettingsPage({
       <Settings
         lang={lang}
         defaultShift={defaultShift}
+        defaultTemplateId={defaultTemplateId}
+        printHotelLine={printHotelLine}
         compactUi={compactUi}
         haptics={haptics}
         printProfile={printProfile}
         lastBackupAt={lastBackupAt}
         appData={appData}
         onDefaultShiftChange={onDefaultShiftChange}
+        onDefaultTemplateIdChange={onDefaultTemplateIdChange}
+        onPrintHotelLineChange={onPrintHotelLineChange}
         onCompactUiChange={onCompactUiChange}
         onHapticsChange={onHapticsChange}
         onPrintProfileChange={onPrintProfileChange}

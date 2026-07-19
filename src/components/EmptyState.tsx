@@ -7,6 +7,8 @@ interface EmptyStateProps {
   lang: Lang
   kind?: EmptyKind
   onNew?: () => void
+  /** Always open full template picker (even when default template is set). */
+  onChooseTemplates?: () => void
   onLoadSample?: () => void
   onClearSearch?: () => void
   onShowAll?: () => void
@@ -43,6 +45,7 @@ export function EmptyState({
   lang,
   kind = 'none',
   onNew,
+  onChooseTemplates,
   onLoadSample,
   onClearSearch,
   onShowAll,
@@ -74,6 +77,11 @@ export function EmptyState({
         {kind === 'none' && onNew && (
           <button type="button" className="btn btn-primary" onClick={onNew}>
             {t(lang, 'newShift')}
+          </button>
+        )}
+        {kind === 'none' && onChooseTemplates && (
+          <button type="button" className="btn btn-ghost" onClick={onChooseTemplates}>
+            {t(lang, 'chooseTemplates')}
           </button>
         )}
         {kind === 'none' && onLoadSample && (

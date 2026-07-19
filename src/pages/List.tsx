@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Lang, ShiftHandover } from '../types'
-import { t } from '../i18n'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { DefaultTemplateId, Lang, ShiftHandover } from '../types'
+import { t, tf } from '../i18n'
 import { EmptyState } from '../components/EmptyState'
 import { TemplatePicker, type CreateChoice } from '../components/TemplatePicker'
 import { ConfirmDialog } from '../components/ConfirmDialog'
@@ -15,11 +15,14 @@ import {
   filterIncompleteOnly,
   resolveContinueLastId,
 } from '../lib/incomplete'
+import { APP_VERSION } from '../version'
 
 interface ListProps {
   lang: Lang
   handovers: ShiftHandover[]
   lastTemplateId?: string
+  /** When set, New creates from this template; null/undefined opens picker. */
+  defaultTemplateId?: DefaultTemplateId | null
   pinnedId?: string | null
   /** True while first paint hydrates from storage. */
   booting?: boolean
@@ -88,6 +91,7 @@ export function List({
   lang,
   handovers,
   lastTemplateId,
+  defaultTemplateId,
   pinnedId,
   booting = false,
   onNew,
@@ -129,9 +133,19 @@ export function List({
     return [pinned, ...list]
   }, [filtered, pinnedId])
 
-  function startNew() {
+  /** New: use default template when set; otherwise open picker. */
+  const startNew = useCallback(() => {
+    if (defaultTemplateId) {
+      onNew(defaultTemplateId)
+      return
+    }
     setPicking(true)
-  }
+  }, [defaultTemplateId, onNew])
+
+  /** Always open full template picker. */
+  const openTemplatePicker = useCallback(() => {
+    setPicking(true)
+  }, [])
 
   function handleChoose(choice: CreateChoice) {
     setPicking(false)
@@ -171,7 +185,7 @@ export function List({
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [picking, deleteId])
+  }, [picking, deleteId, startNew])
 
   if (booting) {
     return (
@@ -196,6 +210,7 @@ export function List({
         <TemplatePicker
           lang={lang}
           lastTemplateId={lastTemplateId}
+          defaultTemplateId={defaultTemplateId}
           onChoose={handleChoose}
           onCancel={() => setPicking(false)}
         />
@@ -216,12 +231,25 @@ export function List({
       />
 
       {handovers.length === 0 ? (
-        <EmptyState lang={lang} kind="none" onNew={startNew} onLoadSample={onLoadSample} />
+        <EmptyState
+          lang={lang}
+          kind="none"
+          onNew={startNew}
+          onChooseTemplates={openTemplatePicker}
+          onLoadSample={onLoadSample}
+        />
       ) : (
         <>
           <div className="list-toolbar no-print">
             <button type="button" className="btn btn-primary" onClick={startNew}>
               {t(lang, 'newShift')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={openTemplatePicker}
+            >
+              {t(lang, 'chooseTemplates')}
             </button>
             {continueId && (
               <button
@@ -345,7 +373,18 @@ export function List({
                           : ''}
                       </span>
                     </button>
-                    <div className="handover-actions no-print">
+                    <div
+                      className="handover-actions no-print"
+                      role="group"
+                      aria-label={h.shiftLabel || t(lang, 'shiftLabel')}
+                    >
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-compact"
+                        onClick={() => onOpen(h.id)}
+                      >
+                        {t(lang, 'open')}
+                      </button>
                       <button
                         type="button"
                         className="btn btn-ghost btn-compact"
@@ -362,7 +401,7 @@ export function List({
                       </button>
                       <button
                         type="button"
-                        className="btn btn-danger-ghost"
+                        className="btn btn-danger-ghost btn-compact"
                         onClick={() => setDeleteId(h.id)}
                       >
                         {t(lang, 'delete')}
@@ -375,6 +414,12 @@ export function List({
           )}
         </>
       )}
+
+      <footer className="list-footer no-print" role="contentinfo">
+        <span className="list-footer-version">
+          {t(lang, 'appTitle')} · {tf(lang, 'appVersion', { v: APP_VERSION })}
+        </span>
+      </footer>
     </div>
   )
 }

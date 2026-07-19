@@ -15,6 +15,7 @@ interface ExportProps {
   handover: ShiftHandover
   exportCompact: boolean
   printProfile: PrintProfile
+  printHotelLine?: string
   haptics: boolean
   onExportCompactChange: (value: boolean) => void
   onBack: () => void
@@ -25,6 +26,7 @@ export function Export({
   handover,
   exportCompact,
   printProfile,
+  printHotelLine = '',
   haptics,
   onExportCompactChange,
   onBack,
@@ -150,6 +152,7 @@ export function Export({
         handover={handover}
         compact={exportCompact}
         printProfile={printProfile}
+        printHotelLine={printHotelLine}
       />
     </div>
   )

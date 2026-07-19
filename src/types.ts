@@ -26,11 +26,21 @@ export interface ShiftHandover {
 
 export type PrintProfile = 'normal' | 'compact'
 
+/** Default template for New: shift templates, blank, or none (open picker). */
+export type DefaultTemplateId = 'frueh' | 'nacht' | 'spaet' | 'blank'
+
 export interface Settings {
   lang: Lang
   defaultShift: string
   /** Last used shift template id (`frueh` | `nacht` | `spaet`; legacy `abend` → nacht). */
   lastTemplateId?: string
+  /**
+   * Default template for New. If set, New creates immediately; null/absent opens picker.
+   * Use secondary “Templates…” to always open the picker.
+   */
+  defaultTemplateId?: DefaultTemplateId | null
+  /** Optional hotel / station line on print sheet (max ~80 chars). */
+  printHotelLine?: string
   /** Single pinned “active now” handover id, if still present. */
   pinnedId?: string | null
   /** Denser phone layout (padding/gaps). Default false. */

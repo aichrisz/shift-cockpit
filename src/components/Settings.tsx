@@ -1,5 +1,11 @@
 import { useMemo, useRef, useState } from 'react'
-import type { AppData, Lang, PrintProfile, ShiftHandover } from '../types'
+import type {
+  AppData,
+  DefaultTemplateId,
+  Lang,
+  PrintProfile,
+  ShiftHandover,
+} from '../types'
 import { t, tf } from '../i18n'
 import { countOlderThan } from '../lib/storage'
 import {
@@ -11,9 +17,29 @@ import {
 import { APP_VERSION, WHATS_NEW_KEYS } from '../version'
 import { ConfirmDialog } from './ConfirmDialog'
 
+const PRINT_HOTEL_LINE_MAX = 80
+
+const DEFAULT_TEMPLATE_OPTIONS: {
+  id: DefaultTemplateId | null
+  labelKey:
+    | 'defaultTemplateNone'
+    | 'templateFrueh'
+    | 'templateSpaet'
+    | 'templateNacht'
+    | 'templateBlank'
+}[] = [
+  { id: null, labelKey: 'defaultTemplateNone' },
+  { id: 'frueh', labelKey: 'templateFrueh' },
+  { id: 'spaet', labelKey: 'templateSpaet' },
+  { id: 'nacht', labelKey: 'templateNacht' },
+  { id: 'blank', labelKey: 'templateBlank' },
+]
+
 interface SettingsProps {
   lang: Lang
   defaultShift: string
+  defaultTemplateId: DefaultTemplateId | null
+  printHotelLine: string
   compactUi: boolean
   haptics: boolean
   printProfile: PrintProfile
@@ -21,6 +47,8 @@ interface SettingsProps {
   /** Full app data for backup export. */
   appData: AppData
   onDefaultShiftChange: (value: string) => void
+  onDefaultTemplateIdChange: (value: DefaultTemplateId | null) => void
+  onPrintHotelLineChange: (value: string) => void
   onCompactUiChange: (value: boolean) => void
   onHapticsChange: (value: boolean) => void
   onPrintProfileChange: (value: PrintProfile) => void
@@ -42,12 +70,16 @@ function clampDays(n: number): number {
 export function Settings({
   lang,
   defaultShift,
+  defaultTemplateId,
+  printHotelLine,
   compactUi,
   haptics,
   printProfile,
   lastBackupAt,
   appData,
   onDefaultShiftChange,
+  onDefaultTemplateIdChange,
+  onPrintHotelLineChange,
   onCompactUiChange,
   onHapticsChange,
   onPrintProfileChange,
@@ -177,6 +209,54 @@ export function Settings({
           onChange={(e) => onDefaultShiftChange(e.target.value)}
           autoComplete="off"
         />
+      </label>
+
+      <div
+        className="settings-default-template"
+        role="group"
+        aria-labelledby="default-template-label"
+      >
+        <span id="default-template-label" className="field-label">
+          {t(lang, 'defaultTemplate')}
+        </span>
+        <p className="settings-hint">{t(lang, 'defaultTemplateHint')}</p>
+        <div className="filter-row settings-profile-row">
+          {DEFAULT_TEMPLATE_OPTIONS.map((opt) => {
+            const active =
+              opt.id === null
+                ? defaultTemplateId === null || defaultTemplateId === undefined
+                : defaultTemplateId === opt.id
+            return (
+              <button
+                key={opt.id ?? 'none'}
+                type="button"
+                className={`filter-chip${active ? ' is-active' : ''}`}
+                aria-pressed={active}
+                onClick={() => onDefaultTemplateIdChange(opt.id)}
+              >
+                {t(lang, opt.labelKey)}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <label className="field">
+        <span className="field-label">{t(lang, 'printHotelLine')}</span>
+        <input
+          type="text"
+          className="input"
+          value={printHotelLine}
+          placeholder={t(lang, 'printHotelLinePh')}
+          maxLength={PRINT_HOTEL_LINE_MAX}
+          onChange={(e) =>
+            onPrintHotelLineChange(e.target.value.slice(0, PRINT_HOTEL_LINE_MAX))
+          }
+          autoComplete="organization"
+        />
+        <span className="settings-hint settings-toggle-hint">
+          {t(lang, 'printHotelLineHint')}
+        </span>
       </label>
 
       <label className="settings-toggle">

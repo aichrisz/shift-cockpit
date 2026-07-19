@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ChecklistItem, Lang } from '../types'
 import { t } from '../i18n'
 import { createId } from '../lib/id'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface ChecklistProps {
   lang: Lang
@@ -12,6 +13,7 @@ interface ChecklistProps {
 
 export function Checklist({ lang, items, onChange, onCopy }: ChecklistProps) {
   const [draft, setDraft] = useState('')
+  const [resetOpen, setResetOpen] = useState(false)
 
   function toggle(id: string) {
     onChange(items.map((item) => (item.id === id ? { ...item, done: !item.done } : item)))
@@ -28,10 +30,27 @@ export function Checklist({ lang, items, onChange, onCopy }: ChecklistProps) {
     setDraft('')
   }
 
+  function resetChecks() {
+    onChange(items.map((item) => ({ ...item, done: false })))
+    setResetOpen(false)
+  }
+
   const done = items.filter((i) => i.done).length
+  const canReset = items.length > 0 && done > 0
 
   return (
     <section className="panel" aria-labelledby="checklist-heading">
+      <ConfirmDialog
+        lang={lang}
+        open={resetOpen}
+        title={t(lang, 'resetChecksTitle')}
+        body={t(lang, 'resetChecksConfirm')}
+        confirmLabel={t(lang, 'resetChecks')}
+        destructive
+        onCancel={() => setResetOpen(false)}
+        onConfirm={resetChecks}
+      />
+
       <div className="panel-head">
         <h2 id="checklist-heading" className="panel-title">
           {t(lang, 'checklist')}
@@ -44,6 +63,15 @@ export function Checklist({ lang, items, onChange, onCopy }: ChecklistProps) {
               onClick={onCopy}
             >
               {t(lang, 'copy')}
+            </button>
+          )}
+          {canReset && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-compact no-print"
+              onClick={() => setResetOpen(true)}
+            >
+              {t(lang, 'resetChecks')}
             </button>
           )}
           <span className="panel-meta">

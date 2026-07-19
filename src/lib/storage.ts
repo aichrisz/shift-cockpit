@@ -1,5 +1,8 @@
 import type { AppData, PrintProfile, Settings, ShiftHandover } from '../types'
-import { normalizeTemplateId } from '../data/templates'
+import {
+  normalizeDefaultTemplateId,
+  normalizeTemplateId,
+} from '../data/templates'
 import { localDaysAgoIso, localIsoDate } from './dates'
 
 export const STORAGE_KEY = 'shift-cockpit-v1'
@@ -7,12 +10,21 @@ export const STORAGE_KEY = 'shift-cockpit-v1'
 const DEFAULT_SETTINGS: Settings = {
   lang: 'de',
   defaultShift: '',
+  defaultTemplateId: null,
+  printHotelLine: '',
   pinnedId: null,
   compactUi: false,
   haptics: true,
   exportCompact: false,
   printProfile: 'normal',
   lastBackupAt: null,
+}
+
+const PRINT_HOTEL_LINE_MAX = 80
+
+function sanitizePrintHotelLine(raw: unknown): string {
+  if (typeof raw !== 'string') return ''
+  return raw.trim().slice(0, PRINT_HOTEL_LINE_MAX)
 }
 
 function normalizePrintProfile(raw: unknown): PrintProfile {
@@ -94,6 +106,10 @@ export function loadAppDataFromUnknown(parsed: unknown): AppData | null {
     : []
 
   const lastTemplateId = normalizeTemplateId(settingsRaw.lastTemplateId)
+  const defaultTemplateId = normalizeDefaultTemplateId(
+    settingsRaw.defaultTemplateId,
+  )
+  const printHotelLine = sanitizePrintHotelLine(settingsRaw.printHotelLine)
   const pinnedIdRaw = settingsRaw.pinnedId
   const pinnedId =
     typeof pinnedIdRaw === 'string'
@@ -127,6 +143,8 @@ export function loadAppDataFromUnknown(parsed: unknown): AppData | null {
           ? settingsRaw.defaultShift
           : DEFAULT_SETTINGS.defaultShift,
       ...(lastTemplateId ? { lastTemplateId } : {}),
+      defaultTemplateId,
+      printHotelLine,
       pinnedId: pinnedResolved,
       compactUi,
       haptics,

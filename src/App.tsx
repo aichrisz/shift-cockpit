@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { AppData, Lang, PrintProfile, ShiftHandover, View } from './types'
+import type {
+  AppData,
+  DefaultTemplateId,
+  Lang,
+  PrintProfile,
+  ShiftHandover,
+  View,
+} from './types'
 import type { CreateChoice } from './components/TemplatePicker'
 import type { TemplateId } from './data/templates'
 import { Header } from './components/Header'
@@ -164,6 +171,9 @@ export default function App() {
   const printProfile: PrintProfile =
     data.settings.printProfile === 'compact' ? 'compact' : 'normal'
   const lastBackupAt = data.settings.lastBackupAt ?? null
+  const defaultTemplateId: DefaultTemplateId | null =
+    data.settings.defaultTemplateId ?? null
+  const printHotelLine = data.settings.printHotelLine ?? ''
 
   useEffect(() => {
     const root = document.documentElement
@@ -200,6 +210,23 @@ export default function App() {
     setData((prev) => ({
       ...prev,
       settings: { ...prev.settings, defaultShift },
+    }))
+  }, [])
+
+  const setDefaultTemplateId = useCallback((value: DefaultTemplateId | null) => {
+    setData((prev) => ({
+      ...prev,
+      settings: { ...prev.settings, defaultTemplateId: value },
+    }))
+  }, [])
+
+  const setPrintHotelLine = useCallback((value: string) => {
+    setData((prev) => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        printHotelLine: value.slice(0, 80),
+      },
     }))
   }, [])
 
@@ -490,6 +517,7 @@ export default function App() {
               lang={lang}
               handovers={data.handovers}
               lastTemplateId={data.settings.lastTemplateId}
+              defaultTemplateId={defaultTemplateId}
               pinnedId={pinnedId}
               booting={booting}
               onNew={handleNew}
@@ -505,6 +533,8 @@ export default function App() {
             <SettingsPage
               lang={lang}
               defaultShift={data.settings.defaultShift}
+              defaultTemplateId={defaultTemplateId}
+              printHotelLine={printHotelLine}
               compactUi={compactUi}
               haptics={haptics}
               printProfile={printProfile}
@@ -512,6 +542,8 @@ export default function App() {
               appData={data}
               handovers={data.handovers}
               onDefaultShiftChange={setDefaultShift}
+              onDefaultTemplateIdChange={setDefaultTemplateId}
+              onPrintHotelLineChange={setPrintHotelLine}
               onCompactUiChange={setCompactUi}
               onHapticsChange={setHaptics}
               onPrintProfileChange={setPrintProfile}
@@ -532,6 +564,7 @@ export default function App() {
               haptics={haptics}
               exportCompact={exportCompact}
               printProfile={printProfile}
+              printHotelLine={printHotelLine}
               onChange={setDraft}
               onSave={handleSave}
               onExport={handleExport}
@@ -553,6 +586,7 @@ export default function App() {
               handover={exportHandover}
               exportCompact={exportCompact}
               printProfile={printProfile}
+              printHotelLine={printHotelLine}
               haptics={haptics}
               onExportCompactChange={setExportCompact}
               onBack={() => {

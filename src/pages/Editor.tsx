@@ -28,6 +28,7 @@ interface EditorProps {
   haptics: boolean
   exportCompact: boolean
   printProfile: PrintProfile
+  printHotelLine?: string
   onChange: (next: ShiftHandover) => void
   onSave: () => void
   onExport: () => void
@@ -60,6 +61,7 @@ export function Editor({
   haptics,
   exportCompact,
   printProfile,
+  printHotelLine = '',
   onChange,
   onSave,
   onExport,
@@ -517,6 +519,7 @@ export function Editor({
         handover={draft}
         compact={exportCompact}
         printProfile={printProfile}
+        printHotelLine={printHotelLine}
       />
     </div>
   )

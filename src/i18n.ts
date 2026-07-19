@@ -161,6 +161,18 @@ export type MessageKey =
   | 'whatsNew3'
   | 'whatsNew4'
   | 'whatsNew5'
+  | 'open'
+  | 'chooseTemplates'
+  | 'defaultTemplate'
+  | 'defaultTemplateHint'
+  | 'defaultTemplateNone'
+  | 'defaultBadge'
+  | 'printHotelLine'
+  | 'printHotelLinePh'
+  | 'printHotelLineHint'
+  | 'resetChecks'
+  | 'resetChecksTitle'
+  | 'resetChecksConfirm'
 
 const de: Record<MessageKey, string> = {
   appTitle: 'Shift Cockpit',
@@ -320,11 +332,25 @@ const de: Record<MessageKey, string> = {
   printSignatures: 'Unterschriften',
   appVersion: 'Version {v}',
   whatsNew: 'Neu in dieser Version',
-  whatsNew1: 'Einstellungen als eigene Seite — die Home-Liste bleibt übersichtlich',
-  whatsNew2: 'Doppelte Zimmernummer: sanfter Hinweis beim Hinzufügen',
-  whatsNew3: 'Schicht-Chips: Früh / Spät / Nacht im Editor',
-  whatsNew4: 'Druck: Unterschriftszeilen für Übergeben / Übernommen',
-  whatsNew5: 'Versionsanzeige und Was ist neu in den Einstellungen',
+  whatsNew1: 'Listen-Karten: Anheften, Duplizieren, Öffnen, Löschen mit Bestätigung',
+  whatsNew2: 'Standard-Vorlage: Neue Schicht startet direkt; „Vorlagen…“ öffnet den Picker',
+  whatsNew3: 'Druck: optionale Hotel-/Stationszeile im Kopf',
+  whatsNew4: 'Checkliste zurücksetzen — erledigt-Haken weg, Labels bleiben',
+  whatsNew5: 'Home-Fußzeile mit Versionsnummer',
+  open: 'Öffnen',
+  chooseTemplates: 'Vorlagen…',
+  defaultTemplate: 'Standard-Vorlage',
+  defaultTemplateHint:
+    'Neue Schicht nutzt diese Vorlage sofort. „Vorlagen…“ auf der Liste öffnet immer den Picker.',
+  defaultTemplateNone: 'Keine (Picker)',
+  defaultBadge: 'Standard',
+  printHotelLine: 'Hotel / Station (Druck)',
+  printHotelLinePh: 'z. B. Front Office · Station 1',
+  printHotelLineHint: 'Optional auf dem Druckbogen unter dem Markennamen (max. 80 Zeichen).',
+  resetChecks: 'Checks zurücksetzen',
+  resetChecksTitle: 'Checks zurücksetzen?',
+  resetChecksConfirm:
+    'Alle erledigt-Haken entfernen? Labels und Notizen bleiben erhalten.',
 }
 
 const en: Record<MessageKey, string> = {
@@ -485,11 +511,24 @@ const en: Record<MessageKey, string> = {
   printSignatures: 'Signatures',
   appVersion: 'Version {v}',
   whatsNew: "What's new",
-  whatsNew1: 'Dedicated Settings page — home list stays clean',
-  whatsNew2: 'Duplicate room soft warning when adding Zi./Rm. lines',
-  whatsNew3: 'Shift label chips: Morning / Late / Night in the editor',
-  whatsNew4: 'Print signature lines for hand-over / take-over',
-  whatsNew5: 'Version number and What’s new in Settings',
+  whatsNew1: 'List cards: pin, duplicate, open, delete with confirm',
+  whatsNew2: 'Default template: New starts immediately; “Templates…” always opens the picker',
+  whatsNew3: 'Print: optional hotel / station line in the header',
+  whatsNew4: 'Reset checks — clear done flags, keep labels',
+  whatsNew5: 'Home footer with version number',
+  open: 'Open',
+  chooseTemplates: 'Templates…',
+  defaultTemplate: 'Default template',
+  defaultTemplateHint:
+    'New shift uses this template immediately. “Templates…” on the list always opens the picker.',
+  defaultTemplateNone: 'None (picker)',
+  defaultBadge: 'Default',
+  printHotelLine: 'Hotel / station (print)',
+  printHotelLinePh: 'e.g. Front Office · Station 1',
+  printHotelLineHint: 'Optional on the print sheet under the brand (max. 80 characters).',
+  resetChecks: 'Reset checks',
+  resetChecksTitle: 'Reset checks?',
+  resetChecksConfirm: 'Clear all done checkmarks? Labels and notes stay.',
 }
 
 const id: Record<MessageKey, string> = {
@@ -650,11 +689,24 @@ const id: Record<MessageKey, string> = {
   printSignatures: 'Tanda tangan',
   appVersion: 'Versi {v}',
   whatsNew: 'Yang baru',
-  whatsNew1: 'Halaman Pengaturan terpisah — daftar beranda tetap rapi',
-  whatsNew2: 'Peringatan lembut jika nomor kamar sudah ada',
-  whatsNew3: 'Chip label shift: Pagi / Sore / Malam di editor',
-  whatsNew4: 'Baris tanda tangan cetak: serah / terima',
-  whatsNew5: 'Nomor versi dan Yang baru di Pengaturan',
+  whatsNew1: 'Kartu daftar: semat, duplikat, buka, hapus dengan konfirmasi',
+  whatsNew2: 'Template default: Shift baru langsung; “Template…” selalu buka pemilih',
+  whatsNew3: 'Cetak: baris hotel / stasiun opsional di header',
+  whatsNew4: 'Reset checklist — hapus centang, label tetap',
+  whatsNew5: 'Footer beranda dengan nomor versi',
+  open: 'Buka',
+  chooseTemplates: 'Template…',
+  defaultTemplate: 'Template default',
+  defaultTemplateHint:
+    'Shift baru memakai template ini langsung. “Template…” di daftar selalu membuka pemilih.',
+  defaultTemplateNone: 'Tidak ada (pemilih)',
+  defaultBadge: 'Default',
+  printHotelLine: 'Hotel / stasiun (cetak)',
+  printHotelLinePh: 'mis. Front Office · Stasiun 1',
+  printHotelLineHint: 'Opsional di lembar cetak di bawah merek (maks. 80 karakter).',
+  resetChecks: 'Reset checklist',
+  resetChecksTitle: 'Reset checklist?',
+  resetChecksConfirm: 'Hapus semua centang selesai? Label dan catatan tetap.',
 }
 
 const catalogs: Record<Lang, Record<MessageKey, string>> = { de, en, id }

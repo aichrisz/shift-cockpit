@@ -144,3 +144,13 @@ export function normalizeTemplateId(raw: unknown): TemplateId | undefined {
   if (raw === 'frueh' || raw === 'nacht' || raw === 'spaet') return raw
   return undefined
 }
+
+/** Settings default: template id, blank, or null (always open picker). */
+export function normalizeDefaultTemplateId(
+  raw: unknown,
+): 'frueh' | 'nacht' | 'spaet' | 'blank' | null {
+  if (raw === null) return null
+  if (raw === 'blank') return 'blank'
+  const id = normalizeTemplateId(raw)
+  return id ?? null
+}

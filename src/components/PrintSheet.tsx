@@ -14,6 +14,8 @@ interface PrintSheetProps {
   compact?: boolean
   /** Layout density for print media. Default normal. */
   printProfile?: PrintProfile
+  /** Optional hotel / station line under brand. */
+  printHotelLine?: string
   /** When true, show on screen as well (export preview). Default print-only. */
   visibleOnScreen?: boolean
 }
@@ -51,12 +53,14 @@ export function PrintSheet({
   handover,
   compact = false,
   printProfile = 'normal',
+  printHotelLine = '',
   visibleOnScreen = false,
 }: PrintSheetProps) {
   const L = exportLabels(lang, handover.lang)
   const tipLine = compact ? null : tipSummaryLine(handover, lang)
   const stamp = formatPrintStamp(lang)
   const profile = printProfile === 'compact' ? 'compact' : 'normal'
+  const hotelLine = printHotelLine.trim()
 
   return (
     <article
@@ -68,6 +72,7 @@ export function PrintSheet({
     >
       <header className="print-sheet-header">
         <p className="print-brand">{t(lang, 'appTitle')}</p>
+        {hotelLine ? <p className="print-hotel-line">{hotelLine}</p> : null}
         <h1 className="print-sheet-title">{L.title}</h1>
         <p className="print-sheet-shift">
           <span className="print-date">{handover.date}</span>

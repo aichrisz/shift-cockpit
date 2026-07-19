@@ -1,4 +1,4 @@
-import type { Lang } from '../types'
+import type { DefaultTemplateId, Lang } from '../types'
 import type { TemplateId } from '../data/templates'
 import { normalizeTemplateId } from '../data/templates'
 import { t } from '../i18n'
@@ -8,6 +8,8 @@ export type CreateChoice = TemplateId | 'blank'
 interface TemplatePickerProps {
   lang: Lang
   lastTemplateId?: string
+  /** Settings default — shows “Default” badge when matching. */
+  defaultTemplateId?: DefaultTemplateId | null
   onChoose: (choice: CreateChoice) => void
   onCancel: () => void
 }
@@ -25,10 +27,21 @@ const OPTIONS: {
 export function TemplatePicker({
   lang,
   lastTemplateId,
+  defaultTemplateId,
   onChoose,
   onCancel,
 }: TemplatePickerProps) {
   const last = normalizeTemplateId(lastTemplateId)
+  const def = defaultTemplateId ?? null
+
+  // Put default first when set so it is visually first/selected.
+  const ordered = def
+    ? [...OPTIONS].sort((a, b) => {
+        if (a.id === def) return -1
+        if (b.id === def) return 1
+        return 0
+      })
+    : OPTIONS
 
   return (
     <div
@@ -42,18 +55,22 @@ export function TemplatePicker({
           {t(lang, 'chooseTemplate')}
         </h2>
         <div className="template-grid">
-          {OPTIONS.map((opt) => {
+          {ordered.map((opt) => {
             const isLast = opt.id !== 'blank' && opt.id === last
+            const isDefault = def !== null && opt.id === def
             return (
               <button
                 key={opt.id}
                 type="button"
                 className={`btn template-btn ${opt.id === 'blank' ? 'btn-ghost' : 'btn-secondary'}${
-                  isLast ? ' is-last' : ''
-                }`}
+                  isLast || isDefault ? ' is-last' : ''
+                }${isDefault ? ' is-default' : ''}`}
                 onClick={() => onChoose(opt.id)}
               >
-                {t(lang, opt.labelKey)}
+                <span className="template-btn-label">{t(lang, opt.labelKey)}</span>
+                {isDefault && (
+                  <span className="template-default-badge">{t(lang, 'defaultBadge')}</span>
+                )}
               </button>
             )
           })}
