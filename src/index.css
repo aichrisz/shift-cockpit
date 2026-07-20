@@ -1294,6 +1294,17 @@ button {
   line-height: 1.4;
 }
 
+.settings-cloud {
+  margin-top: 0.25rem;
+}
+
+.settings-cloud-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
 .settings-backup-actions {
   display: flex;
   flex-wrap: wrap;

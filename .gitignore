@@ -26,3 +26,4 @@ dist-ssr
 GROK_BUILD_PROMPT.md
 .env
 .env.*
+!.env.example

@@ -14,6 +14,7 @@ import {
   parseBackupJson,
   shouldNudgeBackup,
 } from '../lib/backup'
+import { isCloudConfigured } from '../lib/supabase'
 import { APP_VERSION, WHATS_NEW_KEYS } from '../version'
 import { ConfirmDialog } from './ConfirmDialog'
 
@@ -56,6 +57,14 @@ interface SettingsProps {
   onImportBackup: (data: AppData) => void
   handovers: ShiftHandover[]
   onWipeOlder: (days: number) => number
+  /** Cloud sync (optional). */
+  cloudEmail: string | null
+  lastSyncedAt: string | null
+  cloudBusy: boolean
+  cloudMessage: string | null
+  onCloudSignIn: (email: string) => Promise<void>
+  onCloudSignOut: () => Promise<void>
+  onCloudSyncNow: () => Promise<void>
 }
 
 const MIN_DAYS = 7
@@ -65,6 +74,21 @@ const DEFAULT_DAYS = 30
 function clampDays(n: number): number {
   if (!Number.isFinite(n)) return DEFAULT_DAYS
   return Math.min(MAX_DAYS, Math.max(MIN_DAYS, Math.round(n)))
+}
+
+function formatSyncedAt(iso: string | null, lang: Lang): string | null {
+  if (!iso) return null
+  try {
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return null
+    const locale = lang === 'de' ? 'de-DE' : lang === 'id' ? 'id-ID' : 'en-GB'
+    return d.toLocaleString(locale, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    })
+  } catch {
+    return null
+  }
 }
 
 export function Settings({
@@ -87,13 +111,25 @@ export function Settings({
   onImportBackup,
   handovers,
   onWipeOlder,
+  cloudEmail,
+  lastSyncedAt,
+  cloudBusy,
+  cloudMessage,
+  onCloudSignIn,
+  onCloudSignOut,
+  onCloudSyncNow,
 }: SettingsProps) {
   const [days, setDays] = useState(DEFAULT_DAYS)
   const [status, setStatus] = useState<string | null>(null)
   const [wipeOpen, setWipeOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
   const [pendingImport, setPendingImport] = useState<AppData | null>(null)
+  const [magicEmail, setMagicEmail] = useState('')
+  const [linkSent, setLinkSent] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  const cloudReady = isCloudConfigured()
+  const syncedLabel = formatSyncedAt(lastSyncedAt, lang)
 
   const safeDays = clampDays(days)
   const olderCount = useMemo(
@@ -157,6 +193,18 @@ export function Settings({
     setPendingImport(null)
     setImportOpen(false)
     if (fileRef.current) fileRef.current.value = ''
+  }
+
+  async function handleSendLink() {
+    const email = magicEmail.trim()
+    if (!email) return
+    setLinkSent(false)
+    try {
+      await onCloudSignIn(email)
+      setLinkSent(true)
+    } catch {
+      // parent sets cloudMessage
+    }
   }
 
   return (
@@ -310,6 +358,87 @@ export function Settings({
             {t(lang, 'printProfileCompact')}
           </button>
         </div>
+      </div>
+
+      <div className="settings-cloud" role="region" aria-labelledby="cloud-heading">
+        <h3 id="cloud-heading" className="settings-subhead">
+          {t(lang, 'cloud')}
+        </h3>
+        {!cloudReady ? (
+          <>
+            <p className="settings-hint" role="status">
+              {t(lang, 'cloudLocalOnly')}
+            </p>
+            <p className="settings-hint">{t(lang, 'cloudSetupHint')}</p>
+          </>
+        ) : cloudEmail ? (
+          <>
+            <p className="settings-hint" role="status">
+              {tf(lang, 'cloudSignedIn', { email: cloudEmail })}
+            </p>
+            <p className="settings-hint" role="status">
+              {syncedLabel
+                ? tf(lang, 'cloudLastSynced', { when: syncedLabel })
+                : t(lang, 'cloudNeverSynced')}
+            </p>
+            <div className="settings-cloud-actions">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => void onCloudSyncNow()}
+                disabled={cloudBusy}
+              >
+                {cloudBusy ? t(lang, 'cloudSyncing') : t(lang, 'cloudSyncNow')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => void onCloudSignOut()}
+                disabled={cloudBusy}
+              >
+                {t(lang, 'cloudSignOut')}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <label className="field">
+              <span className="field-label">{t(lang, 'cloudEmail')}</span>
+              <input
+                type="email"
+                className="input"
+                value={magicEmail}
+                placeholder={t(lang, 'cloudEmailPh')}
+                autoComplete="email"
+                disabled={cloudBusy}
+                onChange={(e) => {
+                  setMagicEmail(e.target.value)
+                  setLinkSent(false)
+                }}
+              />
+            </label>
+            <div className="settings-cloud-actions">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => void handleSendLink()}
+                disabled={cloudBusy || !magicEmail.trim()}
+              >
+                {cloudBusy ? t(lang, 'cloudSyncing') : t(lang, 'cloudSendLink')}
+              </button>
+            </div>
+            {linkSent && (
+              <p className="settings-status" role="status">
+                {t(lang, 'cloudLinkSent')}
+              </p>
+            )}
+          </>
+        )}
+        {cloudMessage && (
+          <p className="settings-status" role="status">
+            {cloudMessage}
+          </p>
+        )}
       </div>
 
       <div className="settings-backup">

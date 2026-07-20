@@ -30,6 +30,13 @@ interface SettingsPageProps {
   onImportBackup: (data: AppData) => void
   onWipeOlder: (days: number) => number
   onBack: () => void
+  cloudEmail: string | null
+  lastSyncedAt: string | null
+  cloudBusy: boolean
+  cloudMessage: string | null
+  onCloudSignIn: (email: string) => Promise<void>
+  onCloudSignOut: () => Promise<void>
+  onCloudSyncNow: () => Promise<void>
 }
 
 export function SettingsPage({
@@ -53,6 +60,13 @@ export function SettingsPage({
   onImportBackup,
   onWipeOlder,
   onBack,
+  cloudEmail,
+  lastSyncedAt,
+  cloudBusy,
+  cloudMessage,
+  onCloudSignIn,
+  onCloudSignOut,
+  onCloudSyncNow,
 }: SettingsPageProps) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -100,6 +114,13 @@ export function SettingsPage({
         onImportBackup={onImportBackup}
         handovers={handovers}
         onWipeOlder={onWipeOlder}
+        cloudEmail={cloudEmail}
+        lastSyncedAt={lastSyncedAt}
+        cloudBusy={cloudBusy}
+        cloudMessage={cloudMessage}
+        onCloudSignIn={onCloudSignIn}
+        onCloudSignOut={onCloudSignOut}
+        onCloudSyncNow={onCloudSyncNow}
       />
     </div>
   )

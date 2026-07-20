@@ -2,10 +2,10 @@
 
 Local-first **hotel shift handover** notes for one trainee / front-desk shift.
 
-Phone-first checklist: open points, room notes, guest issues, Hotelfach-style checklist, tip split, Markdown export. Data stays in the browser (`localStorage`). No login, no backend.
+Phone-first checklist: open points, room notes, guest issues, Hotelfach-style checklist, tip split, Markdown export. Data stays in the browser (`localStorage`). Optional cloud sync via Supabase (magic link) when env keys are set.
 
 **UI languages:** DE · EN · ID  
-**Version:** 0.9.0
+**Version:** 0.10.0
 
 ## Quick start
 
@@ -17,7 +17,7 @@ npm run dev
 Dev server defaults to **port 8781**.
 
 ```bash
-npm run build         # production build (base /)
+npm run build         # production build (base /) — works without Supabase env
 npm run build:pages   # GitHub Pages build (base /shift-cockpit/ + 404.html)
 npm run preview       # serve dist
 ```
@@ -28,13 +28,27 @@ Optional base path for project pages:
 VITE_BASE=/shift-cockpit/ npm run build
 ```
 
+Optional cloud (see [docs/CLOUD_SYNC.md](docs/CLOUD_SYNC.md)):
+
+```bash
+cp .env.example .env   # set VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
+```
+
+## Features (v0.10)
+
+- **Optional Supabase sync** — magic-link auth, Sync now, debounced push while signed in
+- **Local-first** — no env keys → offline-only; Settings shows setup hint
+- **LWW merge** — last-write-wins per handover by `updated_at`; settings by stamp
+- **Soft delete** — removed handovers get `deleted_at` on remote push
+- **Docs** — `supabase/schema.sql`, `docs/CLOUD_SYNC.md`, `.env.example`
+
 ## Features (v0.9)
 
 - **List card quick actions** — pin, duplicate, open, delete (confirm) as a reliable action row
 - **Default template** — New uses Settings default immediately; **Templates…** always opens the full picker
 - **Print hotel line** — optional station line under brand on PrintSheet
 - **Reset checks** — clear checklist done flags only (confirm); labels/notes stay
-- **Home version footer** — muted Shift Cockpit v0.9.0 on the list
+- **Home version footer** — muted Shift Cockpit version on the list
 
 ## Features (v0.8)
 

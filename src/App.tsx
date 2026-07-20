@@ -23,6 +23,17 @@ import { createTemplateChecklist, templateShiftLabel } from './data/templates'
 import { localIsoDate } from './lib/dates'
 import { handoverSnapshot, isHandoverDirty } from './lib/dirty'
 import { hapticPulse } from './lib/haptics'
+import { getSupabase, isCloudConfigured } from './lib/supabase'
+import {
+  bumpSettingsUpdatedAt,
+  cancelDebouncedPush,
+  getSessionUser,
+  loadSyncMeta,
+  scheduleDebouncedPush,
+  signInWithMagicLink,
+  signOut as cloudSignOut,
+  syncNow,
+} from './lib/sync'
 import { t, tf } from './i18n'
 
 const UNDO_MS = 5000
@@ -125,8 +136,48 @@ export default function App() {
   const [undo, setUndo] = useState<UndoState | null>(null)
   const undoTimerRef = useRef<number | null>(null)
 
+  /** Cloud session + sync chrome */
+  const [cloudEmail, setCloudEmail] = useState<string | null>(null)
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(
+    () => loadSyncMeta().lastSyncedAt,
+  )
+  const [cloudBusy, setCloudBusy] = useState(false)
+  const [cloudMessage, setCloudMessage] = useState<string | null>(null)
+  const dataRef = useRef(data)
+  dataRef.current = data
+  const skipNextPushRef = useRef(true)
+  const prevSettingsJsonRef = useRef(JSON.stringify(data.settings))
+  const signedInRef = useRef(false)
+  const syncingRef = useRef(false)
+
   useEffect(() => {
     saveAppData(data)
+
+    const settingsJson = JSON.stringify(data.settings)
+    if (settingsJson !== prevSettingsJsonRef.current) {
+      prevSettingsJsonRef.current = settingsJson
+      // Skip stamp bump on first paint / merge apply when we already set meta.
+      if (!skipNextPushRef.current) {
+        bumpSettingsUpdatedAt()
+      }
+    }
+
+    if (skipNextPushRef.current) {
+      skipNextPushRef.current = false
+      return
+    }
+    if (signedInRef.current && !syncingRef.current) {
+      scheduleDebouncedPush(
+        data,
+        (at) => {
+          setLastSyncedAt(at)
+        },
+        (err) => {
+          const msg = err instanceof Error ? err.message : String(err)
+          setCloudMessage(tf(data.settings.lang, 'cloudSyncError', { msg }))
+        },
+      )
+    }
   }, [data])
 
   useEffect(() => {
@@ -136,6 +187,106 @@ export default function App() {
     })
     return () => window.cancelAnimationFrame(id)
   }, [])
+
+  const applySyncedData = useCallback((next: AppData, at: string) => {
+    skipNextPushRef.current = true
+    prevSettingsJsonRef.current = JSON.stringify(next.settings)
+    setData(next)
+    setLastSyncedAt(at)
+  }, [])
+
+  const runFullSync = useCallback(async () => {
+    const client = getSupabase()
+    if (!client) return
+    if (syncingRef.current) return
+    syncingRef.current = true
+    setCloudBusy(true)
+    setCloudMessage(null)
+    try {
+      cancelDebouncedPush()
+      const result = await syncNow(client, dataRef.current)
+      applySyncedData(result.data, result.lastSyncedAt)
+      setCloudMessage(t(dataRef.current.settings.lang, 'cloudSyncOk'))
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      setCloudMessage(tf(dataRef.current.settings.lang, 'cloudSyncError', { msg }))
+    } finally {
+      syncingRef.current = false
+      setCloudBusy(false)
+    }
+  }, [applySyncedData])
+
+  // Auth bootstrap + magic-link return
+  useEffect(() => {
+    if (!isCloudConfigured()) return
+    const client = getSupabase()
+    if (!client) return
+
+    let cancelled = false
+
+    void getSessionUser().then((user) => {
+      if (cancelled) return
+      if (user?.email) {
+        signedInRef.current = true
+        setCloudEmail(user.email)
+      }
+    })
+
+    const { data: sub } = client.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return
+      const email = session?.user?.email ?? null
+      setCloudEmail(email)
+      signedInRef.current = Boolean(email)
+
+      if (event === 'SIGNED_IN' && email) {
+        void runFullSync()
+      }
+      if (event === 'SIGNED_OUT') {
+        cancelDebouncedPush()
+        setCloudMessage(null)
+      }
+    })
+
+    return () => {
+      cancelled = true
+      sub.subscription.unsubscribe()
+    }
+  }, [runFullSync])
+
+  const handleCloudSignIn = useCallback(async (email: string) => {
+    setCloudBusy(true)
+    setCloudMessage(null)
+    try {
+      await signInWithMagicLink(email)
+      setCloudMessage(t(dataRef.current.settings.lang, 'cloudLinkSent'))
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      setCloudMessage(tf(dataRef.current.settings.lang, 'cloudSyncError', { msg }))
+      throw err
+    } finally {
+      setCloudBusy(false)
+    }
+  }, [])
+
+  const handleCloudSignOut = useCallback(async () => {
+    setCloudBusy(true)
+    setCloudMessage(null)
+    try {
+      cancelDebouncedPush()
+      await cloudSignOut()
+      signedInRef.current = false
+      setCloudEmail(null)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      setCloudMessage(tf(dataRef.current.settings.lang, 'cloudSyncError', { msg }))
+    } finally {
+      setCloudBusy(false)
+    }
+  }, [])
+
+  const handleCloudSyncNow = useCallback(async () => {
+    await runFullSync()
+  }, [runFullSync])
 
   const clearUndoTimer = useCallback(() => {
     if (undoTimerRef.current != null) {
@@ -551,6 +702,13 @@ export default function App() {
               onImportBackup={handleImportBackup}
               onWipeOlder={handleWipeOlder}
               onBack={() => setView({ name: 'list' })}
+              cloudEmail={cloudEmail}
+              lastSyncedAt={lastSyncedAt}
+              cloudBusy={cloudBusy}
+              cloudMessage={cloudMessage}
+              onCloudSignIn={handleCloudSignIn}
+              onCloudSignOut={handleCloudSignOut}
+              onCloudSyncNow={handleCloudSyncNow}
             />
           )}
 

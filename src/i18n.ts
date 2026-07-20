@@ -173,6 +173,21 @@ export type MessageKey =
   | 'resetChecks'
   | 'resetChecksTitle'
   | 'resetChecksConfirm'
+  | 'cloud'
+  | 'cloudSetupHint'
+  | 'cloudEmail'
+  | 'cloudEmailPh'
+  | 'cloudSendLink'
+  | 'cloudLinkSent'
+  | 'cloudSignOut'
+  | 'cloudSignedIn'
+  | 'cloudSyncNow'
+  | 'cloudSyncing'
+  | 'cloudLastSynced'
+  | 'cloudNeverSynced'
+  | 'cloudSyncOk'
+  | 'cloudSyncError'
+  | 'cloudLocalOnly'
 
 const de: Record<MessageKey, string> = {
   appTitle: 'Shift Cockpit',
@@ -332,11 +347,11 @@ const de: Record<MessageKey, string> = {
   printSignatures: 'Unterschriften',
   appVersion: 'Version {v}',
   whatsNew: 'Neu in dieser Version',
-  whatsNew1: 'Listen-Karten: Anheften, Duplizieren, Öffnen, Löschen mit Bestätigung',
-  whatsNew2: 'Standard-Vorlage: Neue Schicht startet direkt; „Vorlagen…“ öffnet den Picker',
-  whatsNew3: 'Druck: optionale Hotel-/Stationszeile im Kopf',
-  whatsNew4: 'Checkliste zurücksetzen — erledigt-Haken weg, Labels bleiben',
-  whatsNew5: 'Home-Fußzeile mit Versionsnummer',
+  whatsNew1: 'Optionaler Cloud-Sync mit Supabase (Magic Link)',
+  whatsNew2: 'Sync jetzt + automatischer Push nach Speichern (entprellt)',
+  whatsNew3: 'Zusammenführung Last-Write-Wins pro Übergabe',
+  whatsNew4: 'Lokal-first: ohne Keys läuft alles offline wie zuvor',
+  whatsNew5: 'Cloud-Bereich in den Einstellungen (DE/EN/ID)',
   open: 'Öffnen',
   chooseTemplates: 'Vorlagen…',
   defaultTemplate: 'Standard-Vorlage',
@@ -351,6 +366,22 @@ const de: Record<MessageKey, string> = {
   resetChecksTitle: 'Checks zurücksetzen?',
   resetChecksConfirm:
     'Alle erledigt-Haken entfernen? Labels und Notizen bleiben erhalten.',
+  cloud: 'Cloud',
+  cloudSetupHint:
+    'Cloud ist optional. VITE_SUPABASE_URL und VITE_SUPABASE_ANON_KEY setzen, neu bauen — siehe docs/CLOUD_SYNC.md.',
+  cloudEmail: 'E-Mail',
+  cloudEmailPh: 'name@beispiel.de',
+  cloudSendLink: 'Magic Link senden',
+  cloudLinkSent: 'Link gesendet — E-Mail prüfen',
+  cloudSignOut: 'Abmelden',
+  cloudSignedIn: 'Angemeldet als {email}',
+  cloudSyncNow: 'Jetzt synchronisieren',
+  cloudSyncing: 'Synchronisiere…',
+  cloudLastSynced: 'Zuletzt synchronisiert: {when}',
+  cloudNeverSynced: 'Noch nicht synchronisiert',
+  cloudSyncOk: 'Sync abgeschlossen',
+  cloudSyncError: 'Sync-Fehler: {msg}',
+  cloudLocalOnly: 'Nur lokal (Cloud nicht konfiguriert)',
 }
 
 const en: Record<MessageKey, string> = {
@@ -511,11 +542,11 @@ const en: Record<MessageKey, string> = {
   printSignatures: 'Signatures',
   appVersion: 'Version {v}',
   whatsNew: "What's new",
-  whatsNew1: 'List cards: pin, duplicate, open, delete with confirm',
-  whatsNew2: 'Default template: New starts immediately; “Templates…” always opens the picker',
-  whatsNew3: 'Print: optional hotel / station line in the header',
-  whatsNew4: 'Reset checks — clear done flags, keep labels',
-  whatsNew5: 'Home footer with version number',
+  whatsNew1: 'Optional cloud sync via Supabase (magic link)',
+  whatsNew2: 'Sync now + auto push after save (debounced)',
+  whatsNew3: 'Last-write-wins merge per handover',
+  whatsNew4: 'Local-first: without env keys, offline works as before',
+  whatsNew5: 'Cloud section in Settings (DE/EN/ID)',
   open: 'Open',
   chooseTemplates: 'Templates…',
   defaultTemplate: 'Default template',
@@ -529,6 +560,22 @@ const en: Record<MessageKey, string> = {
   resetChecks: 'Reset checks',
   resetChecksTitle: 'Reset checks?',
   resetChecksConfirm: 'Clear all done checkmarks? Labels and notes stay.',
+  cloud: 'Cloud',
+  cloudSetupHint:
+    'Cloud is optional. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, rebuild — see docs/CLOUD_SYNC.md.',
+  cloudEmail: 'Email',
+  cloudEmailPh: 'name@example.com',
+  cloudSendLink: 'Send magic link',
+  cloudLinkSent: 'Link sent — check your email',
+  cloudSignOut: 'Sign out',
+  cloudSignedIn: 'Signed in as {email}',
+  cloudSyncNow: 'Sync now',
+  cloudSyncing: 'Syncing…',
+  cloudLastSynced: 'Last synced: {when}',
+  cloudNeverSynced: 'Not synced yet',
+  cloudSyncOk: 'Sync complete',
+  cloudSyncError: 'Sync error: {msg}',
+  cloudLocalOnly: 'Local only (cloud not configured)',
 }
 
 const id: Record<MessageKey, string> = {
@@ -689,11 +736,11 @@ const id: Record<MessageKey, string> = {
   printSignatures: 'Tanda tangan',
   appVersion: 'Versi {v}',
   whatsNew: 'Yang baru',
-  whatsNew1: 'Kartu daftar: semat, duplikat, buka, hapus dengan konfirmasi',
-  whatsNew2: 'Template default: Shift baru langsung; “Template…” selalu buka pemilih',
-  whatsNew3: 'Cetak: baris hotel / stasiun opsional di header',
-  whatsNew4: 'Reset checklist — hapus centang, label tetap',
-  whatsNew5: 'Footer beranda dengan nomor versi',
+  whatsNew1: 'Sinkron cloud opsional lewat Supabase (magic link)',
+  whatsNew2: 'Sinkron sekarang + push otomatis setelah simpan (debounce)',
+  whatsNew3: 'Gabung last-write-wins per serah terima',
+  whatsNew4: 'Lokal dulu: tanpa env keys, offline seperti sebelumnya',
+  whatsNew5: 'Bagian Cloud di Pengaturan (DE/EN/ID)',
   open: 'Buka',
   chooseTemplates: 'Template…',
   defaultTemplate: 'Template default',
@@ -707,6 +754,22 @@ const id: Record<MessageKey, string> = {
   resetChecks: 'Reset checklist',
   resetChecksTitle: 'Reset checklist?',
   resetChecksConfirm: 'Hapus semua centang selesai? Label dan catatan tetap.',
+  cloud: 'Cloud',
+  cloudSetupHint:
+    'Cloud opsional. Set VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY, rebuild — lihat docs/CLOUD_SYNC.md.',
+  cloudEmail: 'Email',
+  cloudEmailPh: 'nama@contoh.com',
+  cloudSendLink: 'Kirim magic link',
+  cloudLinkSent: 'Link terkirim — cek email',
+  cloudSignOut: 'Keluar',
+  cloudSignedIn: 'Masuk sebagai {email}',
+  cloudSyncNow: 'Sinkron sekarang',
+  cloudSyncing: 'Menyinkronkan…',
+  cloudLastSynced: 'Terakhir sinkron: {when}',
+  cloudNeverSynced: 'Belum pernah sinkron',
+  cloudSyncOk: 'Sinkron selesai',
+  cloudSyncError: 'Kesalahan sinkron: {msg}',
+  cloudLocalOnly: 'Hanya lokal (cloud tidak dikonfigurasi)',
 }
 
 const catalogs: Record<Lang, Record<MessageKey, string>> = { de, en, id }
