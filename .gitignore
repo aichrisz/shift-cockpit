@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 
 GROK_BUILD_PROMPT.md
+.superpowers/
 .env
 .env.*
 !.env.example
