@@ -728,11 +728,89 @@ button {
 
 /* —— List —— */
 
+/* Primary ledger actions: lead action first, paired create actions, quiet utility */
 .list-toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-4);
+}
+
+.ledger-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.ledger-action-lead {
+  width: 100%;
+}
+
+.ledger-action-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.ledger-action-pair .btn {
+  min-width: 0;
+}
+
+.ledger-action-quiet {
+  align-self: center;
+  border-color: transparent;
+  color: var(--text-faint);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.ledger-action-quiet:hover {
+  border-color: var(--border-strong);
+}
+
+@media (min-width: 480px) {
+  .ledger-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .ledger-action-lead {
+    width: auto;
+    flex: 0 1 auto;
+  }
+
+  .ledger-action-pair {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: max-content;
+  }
+
+  .ledger-action-quiet {
+    margin-inline-start: auto;
+  }
+}
+
+/* Compact filter toolbar: search over one wrapping chip row */
+.ledger-filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.ledger-filter-bar .search-field {
+  margin-bottom: 0;
+}
+
+.ledger-filter-bar .filter-row {
+  margin-bottom: 0;
 }
 
 .handover-list {
@@ -751,9 +829,14 @@ button {
   gap: 0;
   background: var(--bg-panel);
   border: 1px solid var(--border);
+  border-left: 3px solid var(--border-strong);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
+}
+
+.handover-card.is-pinned {
+  border-left-color: var(--accent);
 }
 
 .handover-main {
@@ -763,11 +846,53 @@ button {
   border: none;
   background: transparent;
   padding: var(--space-4);
-  padding-bottom: var(--space-2);
+  padding-bottom: var(--space-3);
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
   min-height: var(--tap);
+}
+
+/* Ledger entry kicker: state marker plus shift date */
+.handover-entry-kicker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.handover-entry-date {
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* Checklist progress rail mirrors the existing done/total counts */
+.handover-progress {
+  display: block;
+  height: 3px;
+  margin-top: var(--space-2);
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.handover-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.handover-progress.is-complete .handover-progress-fill {
+  background: var(--success);
 }
 
 .handover-main:hover {
@@ -915,22 +1040,32 @@ button {
   }
 }
 
+/* Predictable action grid: 2 columns on narrow phones, 4 from 480px */
 .handover-actions {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3) var(--space-3);
+  padding: var(--space-3);
   border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
 
+@media (min-width: 480px) {
+  .handover-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 .handover-actions .btn {
-  min-height: 2.5rem;
-  min-width: 4.5rem;
-  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap);
+  min-width: 0;
+  padding-inline: var(--space-2);
+  overflow: hidden;
+  text-align: center;
 }
 
 .list-footer {

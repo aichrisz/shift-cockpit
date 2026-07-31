@@ -240,77 +240,89 @@ export function List({
         />
       ) : (
         <>
-          <div className="list-toolbar no-print">
-            <button type="button" className="btn btn-primary" onClick={startNew}>
-              {t(lang, 'newShift')}
-            </button>
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={openTemplatePicker}
-            >
-              {t(lang, 'chooseTemplates')}
-            </button>
+          <div className="ledger-actions list-toolbar no-print">
             {continueId && (
               <button
                 type="button"
-                className="btn btn-secondary"
+                className="btn btn-primary ledger-action-lead"
                 onClick={() => onOpen(continueId)}
               >
                 {t(lang, 'continueLast')}
               </button>
             )}
-            <button type="button" className="btn btn-ghost" onClick={onLoadSample}>
+            <div className="ledger-action-pair">
+              <button
+                type="button"
+                className={`btn ${continueId ? 'btn-secondary' : 'btn-primary'}`}
+                onClick={startNew}
+              >
+                {t(lang, 'newShift')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={openTemplatePicker}
+              >
+                {t(lang, 'chooseTemplates')}
+              </button>
+            </div>
+            <button
+              type="button"
+              className="btn btn-ghost ledger-action-quiet"
+              onClick={onLoadSample}
+            >
               {t(lang, 'loadSample')}
             </button>
           </div>
 
-          <label className="search-field no-print">
-            <span className="visually-hidden">{t(lang, 'search')}</span>
-            <input
-              ref={searchRef}
-              type="search"
-              className="input search-input"
-              value={search}
-              placeholder={t(lang, 'searchPh')}
-              autoComplete="off"
-              enterKeyHint="search"
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </label>
+          <div className="ledger-filter-bar no-print">
+            <label className="search-field">
+              <span className="visually-hidden">{t(lang, 'search')}</span>
+              <input
+                ref={searchRef}
+                type="search"
+                className="input search-input"
+                value={search}
+                placeholder={t(lang, 'searchPh')}
+                autoComplete="off"
+                enterKeyHint="search"
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </label>
 
-          <div
-            className="filter-row no-print"
-            role="group"
-            aria-label={t(lang, 'filterAll')}
-          >
-            {(
-              [
-                ['today', 'filterToday'],
-                ['7d', 'filter7d'],
-                ['all', 'filterAll'],
-              ] as const
-            ).map(([id, key]) => (
-              <button
-                key={id}
-                type="button"
-                className={`filter-chip${filter === id ? ' is-active' : ''}`}
-                aria-pressed={filter === id}
-                onClick={() => setFilter(id)}
-              >
-                {t(lang, key)}
-              </button>
-            ))}
-            <button
-              type="button"
-              className={`filter-chip filter-chip-incomplete${
-                incompleteOnly ? ' is-active' : ''
-              }`}
-              aria-pressed={incompleteOnly}
-              onClick={() => setIncompleteOnly((v) => !v)}
+            <div
+              className="filter-row"
+              role="group"
+              aria-label={t(lang, 'filterAll')}
             >
-              {t(lang, 'filterIncomplete')}
-            </button>
+              {(
+                [
+                  ['today', 'filterToday'],
+                  ['7d', 'filter7d'],
+                  ['all', 'filterAll'],
+                ] as const
+              ).map(([id, key]) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`filter-chip${filter === id ? ' is-active' : ''}`}
+                  aria-pressed={filter === id}
+                  onClick={() => setFilter(id)}
+                >
+                  {t(lang, key)}
+                </button>
+              ))}
+              <button
+                type="button"
+                className={`filter-chip filter-chip-incomplete${
+                  incompleteOnly ? ' is-active' : ''
+                }`}
+                aria-pressed={incompleteOnly}
+                onClick={() => setIncompleteOnly((v) => !v)}
+              >
+                {t(lang, 'filterIncomplete')}
+              </button>
+            </div>
           </div>
 
           {sorted.length === 0 ? (
@@ -355,14 +367,17 @@ export function List({
                       className="handover-main"
                       onClick={() => onOpen(h.id)}
                     >
+                      <span className="handover-entry-kicker">
+                        {isPinned && (
+                          <span className="active-badge">
+                            {t(lang, 'activeBadge')}
+                          </span>
+                        )}
+                        <span className="handover-entry-date">{h.date}</span>
+                      </span>
                       <span className="handover-title-row">
                         <span className="handover-title">
-                          {isPinned && (
-                            <span className="active-badge">
-                              {t(lang, 'activeBadge')}
-                            </span>
-                          )}
-                          {h.shiftLabel || t(lang, 'shiftLabel')} · {h.date}
+                          {h.shiftLabel || t(lang, 'shiftLabel')}
                         </span>
                         <ChecklistBadge lang={lang} done={done} total={total} />
                       </span>
@@ -372,6 +387,21 @@ export function List({
                           ? ` · ${done}/${total} ${t(lang, 'doneCount')}`
                           : ''}
                       </span>
+                      {total > 0 && (
+                        <span
+                          className={`handover-progress${
+                            done >= total ? ' is-complete' : ''
+                          }`}
+                          aria-hidden="true"
+                        >
+                          <span
+                            className="handover-progress-fill"
+                            style={{
+                              width: `${Math.round((done / total) * 100)}%`,
+                            }}
+                          />
+                        </span>
+                      )}
                     </button>
                     <div
                       className="handover-actions no-print"
