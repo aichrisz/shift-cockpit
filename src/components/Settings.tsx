@@ -260,7 +260,7 @@ export function Settings({
       </label>
 
       <div
-        className="settings-default-template"
+        className="settings-default-template ledger-settings-group"
         role="group"
         aria-labelledby="default-template-label"
       >
@@ -335,7 +335,11 @@ export function Settings({
         </span>
       </label>
 
-      <div className="settings-print-profile" role="group" aria-labelledby="print-profile-label">
+      <div
+        className="settings-print-profile ledger-settings-group"
+        role="group"
+        aria-labelledby="print-profile-label"
+      >
         <span id="print-profile-label" className="field-label">
           {t(lang, 'printProfile')}
         </span>
@@ -360,7 +364,11 @@ export function Settings({
         </div>
       </div>
 
-      <div className="settings-cloud" role="region" aria-labelledby="cloud-heading">
+      <div
+        className="settings-cloud ledger-settings-group"
+        role="region"
+        aria-labelledby="cloud-heading"
+      >
         <h3 id="cloud-heading" className="settings-subhead">
           {t(lang, 'cloud')}
         </h3>
@@ -441,7 +449,7 @@ export function Settings({
         )}
       </div>
 
-      <div className="settings-backup">
+      <div className="settings-backup ledger-settings-group">
         <h3 className="settings-subhead">{t(lang, 'backup')}</h3>
         <p className="settings-hint" role="status">
           {backupLabel
@@ -478,7 +486,7 @@ export function Settings({
         </div>
       </div>
 
-      <div className="settings-wipe">
+      <div className="settings-wipe ledger-settings-group ledger-settings-group-danger">
         <h3 className="settings-subhead">{t(lang, 'wipeOlder')}</h3>
         <label className="field">
           <span className="field-label">{t(lang, 'wipeDays')}</span>

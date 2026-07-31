@@ -236,11 +236,11 @@ export function Editor({
         />
       )}
 
-      <div className="editor-toolbar no-print">
+      <div className="editor-toolbar ledger-command-bar editor-command-bar no-print">
         <button type="button" className="btn btn-ghost" onClick={handleBack}>
           {t(lang, 'back')}
         </button>
-        <div className="toolbar-actions">
+        <div className="toolbar-actions ledger-command-actions">
           {dirty && (
             <span className="dirty-badge" title={t(lang, 'unsaved')}>
               {t(lang, 'unsaved')}
@@ -290,93 +290,98 @@ export function Editor({
       )}
 
       <div className="editor-screen">
-        <div className="field-grid">
-          <div className="field">
-            <span className="field-label" id="shift-label-field">
-              {t(lang, 'shiftLabel')}
-            </span>
-            <input
-              type="text"
-              className="input"
-              value={draft.shiftLabel}
-              placeholder={t(lang, 'shiftPlaceholder')}
-              aria-labelledby="shift-label-field"
-              onChange={(e) => patch({ shiftLabel: e.target.value })}
-            />
-            <div
-              className="shift-chip-row no-print"
-              role="group"
-              aria-label={t(lang, 'shiftLabelChips')}
-            >
-              {SHIFT_CHIPS.map((id) => {
-                const label = t(
-                  lang,
-                  id === 'frueh'
-                    ? 'templateFrueh'
-                    : id === 'spaet'
-                      ? 'templateSpaet'
-                      : 'templateNacht',
-                )
-                const full = templateShiftLabel(id, lang)
-                const active =
-                  draft.shiftLabel.trim().toLowerCase() === full.toLowerCase() ||
-                  draft.shiftLabel.trim().toLowerCase() === label.toLowerCase()
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    className={`filter-chip shift-label-chip${active ? ' is-active' : ''}`}
-                    aria-pressed={active}
-                    onClick={() => handleShiftChip(id)}
-                  >
-                    {label}
-                  </button>
-                )
-              })}
+        <section className="ledger-core-section">
+          <div className="field-grid">
+            <div className="field">
+              <span className="field-label" id="shift-label-field">
+                {t(lang, 'shiftLabel')}
+              </span>
+              <input
+                type="text"
+                className="input"
+                value={draft.shiftLabel}
+                placeholder={t(lang, 'shiftPlaceholder')}
+                aria-labelledby="shift-label-field"
+                onChange={(e) => patch({ shiftLabel: e.target.value })}
+              />
+              <div
+                className="shift-chip-row no-print"
+                role="group"
+                aria-label={t(lang, 'shiftLabelChips')}
+              >
+                {SHIFT_CHIPS.map((id) => {
+                  const label = t(
+                    lang,
+                    id === 'frueh'
+                      ? 'templateFrueh'
+                      : id === 'spaet'
+                        ? 'templateSpaet'
+                        : 'templateNacht',
+                  )
+                  const full = templateShiftLabel(id, lang)
+                  const active =
+                    draft.shiftLabel.trim().toLowerCase() === full.toLowerCase() ||
+                    draft.shiftLabel.trim().toLowerCase() === label.toLowerCase()
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      className={`filter-chip shift-label-chip${active ? ' is-active' : ''}`}
+                      aria-pressed={active}
+                      onClick={() => handleShiftChip(id)}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
+            <label className="field">
+              <span className="field-label">{t(lang, 'date')}</span>
+              <input
+                type="date"
+                className="input"
+                value={draft.date}
+                onChange={(e) => patch({ date: e.target.value })}
+              />
+            </label>
           </div>
-          <label className="field">
-            <span className="field-label">{t(lang, 'date')}</span>
-            <input
-              type="date"
-              className="input"
-              value={draft.date}
-              onChange={(e) => patch({ date: e.target.value })}
+
+          <div className="field ledger-open-points">
+            <div className="field-label-row">
+              <span className="field-label" id="open-points-label">
+                {t(lang, 'openPoints')}
+              </span>
+              <button
+                type="button"
+                className="btn btn-ghost btn-compact no-print"
+                onClick={() => copySection(draft.openPoints, 'copyOpen')}
+              >
+                {t(lang, 'copy')}
+              </button>
+            </div>
+            <QuickChips
+              lang={lang}
+              templateId={draft.templateId}
+              onPick={(phrase) =>
+                patch({ openPoints: appendChipLine(draft.openPoints, phrase) })
+              }
             />
-          </label>
-        </div>
-
-        <div className="field">
-          <div className="field-label-row">
-            <span className="field-label" id="open-points-label">
-              {t(lang, 'openPoints')}
-            </span>
-            <button
-              type="button"
-              className="btn btn-ghost btn-compact no-print"
-              onClick={() => copySection(draft.openPoints, 'copyOpen')}
-            >
-              {t(lang, 'copy')}
-            </button>
+            <textarea
+              className="input textarea"
+              rows={4}
+              value={draft.openPoints}
+              placeholder={t(lang, 'openPointsPh')}
+              aria-labelledby="open-points-label"
+              onChange={(e) => patch({ openPoints: e.target.value })}
+            />
           </div>
-          <QuickChips
-            lang={lang}
-            templateId={draft.templateId}
-            onPick={(phrase) =>
-              patch({ openPoints: appendChipLine(draft.openPoints, phrase) })
-            }
-          />
-          <textarea
-            className="input textarea"
-            rows={4}
-            value={draft.openPoints}
-            placeholder={t(lang, 'openPointsPh')}
-            aria-labelledby="open-points-label"
-            onChange={(e) => patch({ openPoints: e.target.value })}
-          />
-        </div>
+        </section>
 
-        <section className="panel notes-optional no-print" aria-labelledby="room-notes-label">
+        <section
+          className="panel notes-optional ledger-optional-section no-print"
+          aria-labelledby="room-notes-label"
+        >
           <div className="panel-head">
             <h2 id="room-notes-label" className="panel-title">
               {t(lang, 'roomNotes')} <span className="optional-tag">({t(lang, 'optional')})</span>
@@ -434,7 +439,10 @@ export function Editor({
           ) : null}
         </section>
 
-        <section className="panel notes-optional no-print" aria-labelledby="guest-notes-label">
+        <section
+          className="panel notes-optional ledger-optional-section no-print"
+          aria-labelledby="guest-notes-label"
+        >
           <div className="panel-head">
             <h2 id="guest-notes-label" className="panel-title">
               {t(lang, 'guestNotes')} <span className="optional-tag">({t(lang, 'optional')})</span>
@@ -485,7 +493,10 @@ export function Editor({
           onCopy={() => copySection(checklistToMarkdown(draft), 'copyChecklist')}
         />
 
-        <section className="panel tips-optional no-print" aria-labelledby="tips-optional-heading">
+        <section
+          className="panel tips-optional ledger-optional-section no-print"
+          aria-labelledby="tips-optional-heading"
+        >
           <div className="panel-head">
             <h2 id="tips-optional-heading" className="panel-title">
               {t(lang, 'tipsOptional')}

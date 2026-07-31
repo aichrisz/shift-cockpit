@@ -97,11 +97,11 @@ export function Export({
 
   return (
     <div className={`export-page${exportCompact ? ' is-export-compact' : ''}`}>
-      <div className="editor-toolbar no-print">
+      <div className="editor-toolbar ledger-command-bar export-command-bar no-print">
         <button type="button" className="btn btn-ghost" onClick={onBack}>
           {t(lang, 'back')}
         </button>
-        <div className="toolbar-actions">
+        <div className="toolbar-actions ledger-command-actions">
           <button type="button" className="btn btn-ghost" onClick={handlePrint}>
             {t(lang, 'print')}
           </button>
@@ -142,10 +142,14 @@ export function Export({
         </p>
       )}
 
-      <h2 className="panel-title no-print">{t(lang, 'exportPreview')}</h2>
-      <pre className="md-preview no-print" tabIndex={0}>
-        {markdown}
-      </pre>
+      <section className="ledger-export-preview no-print" aria-labelledby="export-preview-heading">
+        <h2 id="export-preview-heading" className="panel-title no-print">
+          {t(lang, 'exportPreview')}
+        </h2>
+        <pre className="md-preview no-print" tabIndex={0}>
+          {markdown}
+        </pre>
+      </section>
 
       <PrintSheet
         lang={lang}

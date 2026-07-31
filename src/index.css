@@ -1694,6 +1694,37 @@ button {
   margin-bottom: var(--space-2);
 }
 
+/* Settings groups read as ledger rows separated by hairlines */
+.ledger-settings-group {
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.ledger-settings-group > .settings-subhead:first-child {
+  margin-top: 0;
+}
+
+.ledger-settings-group:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.ledger-settings-group-danger .settings-subhead {
+  color: var(--text);
+}
+
+/* Cloud status lines stay legible next to their actions */
+.settings-cloud .settings-hint:last-of-type {
+  margin-bottom: var(--space-3);
+}
+
+.settings-cloud-actions .btn,
+.settings-backup-actions .btn {
+  min-width: 0;
+}
+
 .settings-toggle {
   display: flex;
   align-items: flex-start;
@@ -1756,6 +1787,78 @@ button {
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
+}
+
+/* Command bar: one calm ledger rule under Back + primary actions.
+   Wraps at 320px so Save and Export always stay reachable. */
+.ledger-command-bar {
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.ledger-command-actions {
+  gap: var(--space-2);
+  justify-content: flex-end;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ledger-command-actions .btn {
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.ledger-command-bar .dirty-badge {
+  align-self: center;
+}
+
+@media (max-width: 22.5rem) {
+  .ledger-command-bar {
+    align-items: stretch;
+  }
+
+  .ledger-command-actions {
+    justify-content: flex-start;
+  }
+
+  .ledger-command-actions .btn {
+    flex: 1 1 8rem;
+  }
+}
+
+/* Editor body: core shift record reads first, optional notes stay quieter */
+.ledger-core-section {
+  margin: 0 0 var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.ledger-core-section .ledger-open-points {
+  margin-bottom: 0;
+}
+
+.ledger-optional-section {
+  background: var(--bg-elevated);
+  border-color: var(--border);
+}
+
+.ledger-optional-section > .panel-head .panel-title {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.ledger-optional-section > .panel-head {
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  flex-wrap: wrap;
+}
+
+.ledger-optional-section > .panel-head .btn {
+  flex-shrink: 0;
 }
 
 /* View transitions live on .view-root */
@@ -1906,6 +2009,26 @@ button {
 .md-preview:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
+}
+
+/* Export preview reads as the final ledger block */
+.ledger-export-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  min-width: 0;
+}
+
+.ledger-export-preview .panel-title {
+  margin-bottom: 0;
+  color: var(--text-muted);
+}
+
+.ledger-export-preview .md-preview {
+  max-width: 100%;
 }
 
 /* —— Reduced motion —— */

@@ -86,7 +86,7 @@ export function SettingsPage({
 
   return (
     <div className="settings-page">
-      <div className="settings-page-toolbar no-print">
+      <div className="settings-page-toolbar ledger-command-bar no-print">
         <button type="button" className="btn btn-ghost" onClick={onBack}>
           {t(lang, 'back')}
         </button>
