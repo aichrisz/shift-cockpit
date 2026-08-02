@@ -1,7 +1,7 @@
 /** App version — keep in sync with package.json. */
-export const APP_VERSION = '0.10.0'
+export const APP_VERSION = '0.11.0'
 
-/** i18n keys for What’s new bullets (v0.10). */
+/** i18n keys for What’s new bullets (v0.11). */
 export const WHATS_NEW_KEYS = [
   'whatsNew1',
   'whatsNew2',

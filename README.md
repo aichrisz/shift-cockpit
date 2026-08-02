@@ -5,7 +5,7 @@ Local-first **hotel shift handover** notes for one trainee / front-desk shift.
 Phone-first checklist: open points, room notes, guest issues, Hotelfach-style checklist, tip split, Markdown export. Data stays in the browser (`localStorage`). Optional cloud sync via Supabase (magic link) when env keys are set.
 
 **UI languages:** DE · EN · ID  
-**Version:** 0.10.0
+**Version:** 0.11.0
 
 ## Quick start
 
@@ -33,6 +33,13 @@ Optional cloud (see [docs/CLOUD_SYNC.md](docs/CLOUD_SYNC.md)):
 ```bash
 cp .env.example .env   # set VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
 ```
+
+## Features (v0.11)
+
+- **Calm Hotel Ledger** — warm ivory canvas, parchment surfaces, charcoal text, and restrained brass accents
+- **Mobile-first handover desk** — compact list action grids, wrap-safe editor controls, and no horizontal overflow at 320–390 px
+- **Focused editor** — distinct handover core, quiet optional notes, and a clearer checklist/command hierarchy
+- **Unified operational surfaces** — Settings and Markdown Export match the ledger visual language while preserving existing flows
 
 ## Features (v0.10)
 
