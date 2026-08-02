@@ -480,9 +480,11 @@ button {
 
 .panel-head-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .input {
@@ -1875,9 +1877,10 @@ button {
 
 .panel-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2) var(--space-3);
   margin-bottom: var(--space-3);
 }
 
@@ -1907,7 +1910,7 @@ button {
 .panel-meta {
   font-size: 0.75rem;
   color: var(--text-faint);
-  white-space: nowrap;
+  white-space: normal;
 }
 
 /* —— Checklist —— */
