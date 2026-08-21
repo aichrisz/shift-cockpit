@@ -318,6 +318,7 @@ export default function App() {
   const pinnedId = data.settings.pinnedId ?? null
   const compactUi = data.settings.compactUi === true
   const haptics = data.settings.haptics !== false
+  const darkMode = data.settings.darkMode === true
   const exportCompact = data.settings.exportCompact === true
   const printProfile: PrintProfile =
     data.settings.printProfile === 'compact' ? 'compact' : 'normal'
@@ -338,6 +339,10 @@ export default function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-print-profile', printProfile)
   }, [printProfile])
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light')
+  }, [darkMode])
 
   const setBaseline = useCallback((h: ShiftHandover | null) => {
     baselineRef.current = h ? cloneDraft(h) : null
@@ -392,6 +397,13 @@ export default function App() {
     setData((prev) => ({
       ...prev,
       settings: { ...prev.settings, haptics: value },
+    }))
+  }, [])
+
+  const setDarkMode = useCallback((value: boolean) => {
+    setData((prev) => ({
+      ...prev,
+      settings: { ...prev.settings, darkMode: value },
     }))
   }, [])
 
@@ -688,6 +700,7 @@ export default function App() {
               printHotelLine={printHotelLine}
               compactUi={compactUi}
               haptics={haptics}
+              darkMode={darkMode}
               printProfile={printProfile}
               lastBackupAt={lastBackupAt}
               appData={data}
@@ -697,6 +710,7 @@ export default function App() {
               onPrintHotelLineChange={setPrintHotelLine}
               onCompactUiChange={setCompactUi}
               onHapticsChange={setHaptics}
+              onDarkModeChange={setDarkMode}
               onPrintProfileChange={setPrintProfile}
               onBackupExported={handleBackupExported}
               onImportBackup={handleImportBackup}

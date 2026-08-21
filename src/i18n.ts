@@ -93,6 +93,8 @@ export type MessageKey =
   | 'chipsLess'
   | 'compactUi'
   | 'compactUiHint'
+  | 'darkMode'
+  | 'darkModeHint'
   | 'confirm'
   | 'confirmTitle'
   | 'wipeTitle'
@@ -282,6 +284,8 @@ const de: Record<MessageKey, string> = {
   chipsLess: 'Weniger',
   compactUi: 'Kompakte Ansicht',
   compactUiHint: 'Weniger Abstand und dichtere Karten auf dem Handy.',
+  darkMode: 'Dunkelmodus',
+  darkModeHint: 'Dunkles Farbschema für die Benutzeroberfläche.',
   confirm: 'Bestätigen',
   confirmTitle: 'Bestätigen',
   wipeTitle: 'Ältere löschen',
@@ -477,6 +481,8 @@ const en: Record<MessageKey, string> = {
   chipsLess: 'Less',
   compactUi: 'Compact layout',
   compactUiHint: 'Tighter spacing and denser cards on phone.',
+  darkMode: 'Dark mode',
+  darkModeHint: 'Dark colour scheme for the interface.',
   confirm: 'Confirm',
   confirmTitle: 'Confirm',
   wipeTitle: 'Delete older',
@@ -671,6 +677,8 @@ const id: Record<MessageKey, string> = {
   chipsLess: 'Sedikit',
   compactUi: 'Tampilan ringkas',
   compactUiHint: 'Jarak lebih rapat dan kartu lebih padat di HP.',
+  darkMode: 'Mode gelap',
+  darkModeHint: 'Skema warna gelap untuk antarmuka.',
   confirm: 'Konfirmasi',
   confirmTitle: 'Konfirmasi',
   wipeTitle: 'Hapus yang lama',

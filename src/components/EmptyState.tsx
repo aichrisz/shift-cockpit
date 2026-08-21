@@ -35,8 +35,13 @@ function EmptyIllustration({ kind }: { kind: EmptyKind }) {
   }
   return (
     <div className="empty-illo empty-illo-none" aria-hidden="true">
-      <span className="empty-illo-card" />
-      <span className="empty-illo-plus">+</span>
+      <img
+        src="/empty-state.png"
+        alt=""
+        className="empty-illo-img"
+        width={210}
+        height={210}
+      />
     </div>
   )
 }

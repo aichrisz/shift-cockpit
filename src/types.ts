@@ -47,6 +47,8 @@ export interface Settings {
   compactUi?: boolean
   /** Short vibrate on key actions when supported. Default true. */
   haptics?: boolean
+  /** Dark mode. Default false. */
+  darkMode?: boolean
   /** Compact export: open points + room + guest notes only. Default false. */
   exportCompact?: boolean
   /** Print layout density for PrintSheet / @media print. Default normal. */

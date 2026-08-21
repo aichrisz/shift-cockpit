@@ -43,6 +43,7 @@ interface SettingsProps {
   printHotelLine: string
   compactUi: boolean
   haptics: boolean
+  darkMode: boolean
   printProfile: PrintProfile
   lastBackupAt: string | null
   /** Full app data for backup export. */
@@ -52,6 +53,7 @@ interface SettingsProps {
   onPrintHotelLineChange: (value: string) => void
   onCompactUiChange: (value: boolean) => void
   onHapticsChange: (value: boolean) => void
+  onDarkModeChange: (value: boolean) => void
   onPrintProfileChange: (value: PrintProfile) => void
   onBackupExported: () => void
   onImportBackup: (data: AppData) => void
@@ -98,6 +100,7 @@ export function Settings({
   printHotelLine,
   compactUi,
   haptics,
+  darkMode,
   printProfile,
   lastBackupAt,
   appData,
@@ -106,6 +109,7 @@ export function Settings({
   onPrintHotelLineChange,
   onCompactUiChange,
   onHapticsChange,
+  onDarkModeChange,
   onPrintProfileChange,
   onBackupExported,
   onImportBackup,
@@ -331,6 +335,20 @@ export function Settings({
           <span className="settings-toggle-label">{t(lang, 'haptics')}</span>
           <span className="settings-hint settings-toggle-hint">
             {t(lang, 'hapticsHint')}
+          </span>
+        </span>
+      </label>
+
+      <label className="settings-toggle">
+        <input
+          type="checkbox"
+          checked={darkMode}
+          onChange={(e) => onDarkModeChange(e.target.checked)}
+        />
+        <span>
+          <span className="settings-toggle-label">{t(lang, 'darkMode')}</span>
+          <span className="settings-hint settings-toggle-hint">
+            {t(lang, 'darkModeHint')}
           </span>
         </span>
       </label>

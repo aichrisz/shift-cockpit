@@ -16,6 +16,7 @@ interface SettingsPageProps {
   printHotelLine: string
   compactUi: boolean
   haptics: boolean
+  darkMode: boolean
   printProfile: PrintProfile
   lastBackupAt: string | null
   appData: AppData
@@ -25,6 +26,7 @@ interface SettingsPageProps {
   onPrintHotelLineChange: (value: string) => void
   onCompactUiChange: (value: boolean) => void
   onHapticsChange: (value: boolean) => void
+  onDarkModeChange: (value: boolean) => void
   onPrintProfileChange: (value: PrintProfile) => void
   onBackupExported: () => void
   onImportBackup: (data: AppData) => void
@@ -46,6 +48,7 @@ export function SettingsPage({
   printHotelLine,
   compactUi,
   haptics,
+  darkMode,
   printProfile,
   lastBackupAt,
   appData,
@@ -55,6 +58,7 @@ export function SettingsPage({
   onPrintHotelLineChange,
   onCompactUiChange,
   onHapticsChange,
+  onDarkModeChange,
   onPrintProfileChange,
   onBackupExported,
   onImportBackup,
@@ -101,6 +105,7 @@ export function SettingsPage({
         printHotelLine={printHotelLine}
         compactUi={compactUi}
         haptics={haptics}
+        darkMode={darkMode}
         printProfile={printProfile}
         lastBackupAt={lastBackupAt}
         appData={appData}
@@ -109,6 +114,7 @@ export function SettingsPage({
         onPrintHotelLineChange={onPrintHotelLineChange}
         onCompactUiChange={onCompactUiChange}
         onHapticsChange={onHapticsChange}
+        onDarkModeChange={onDarkModeChange}
         onPrintProfileChange={onPrintProfileChange}
         onBackupExported={onBackupExported}
         onImportBackup={onImportBackup}

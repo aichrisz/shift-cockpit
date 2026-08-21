@@ -1,3 +1,73 @@
+# Theme
+
+## Part 1 — Token summary (compact)
+```css
+:root {
+  color-scheme: light;
+
+  /* Canvas and parchment surfaces */
+  --bg: #f3ede1;
+  --bg-elevated: #fbf7ef;
+  --bg-panel: #fffdf8;
+  --bg-input: #fffdf8;
+  --border: #d7cdbb;
+  --border-strong: #a99b83;
+
+  /* Ledger ink */
+  --text: #27241f;
+  --text-muted: #665f53;
+  --text-faint: #857b6b;
+
+  /* Restrained brass */
+  --accent: #a87932;
+  --accent-hover: #8d6326;
+  --accent-dim: rgba(168, 121, 50, 0.13);
+  /* Brass hairline for badges, chips and pinned cards */
+  --accent-line: rgba(168, 121, 50, 0.38);
+  /* Brass dark enough for text/fills that carry AA contrast */
+  --accent-text: #7a5420;
+  --accent-strong: #8a5f24;
+  --accent-strong-hover: #74501f;
+  --on-accent: #fffdf8;
+
+  /* Semantic states */
+  --success: #356b49;
+  --success-dim: rgba(53, 107, 73, 0.12);
+  --success-line: rgba(53, 107, 73, 0.32);
+  --danger: #a85444;
+  --danger-dim: rgba(168, 84, 68, 0.11);
+  --danger-line: rgba(168, 84, 68, 0.35);
+  --focus: #80551b;
+
+  /* Ambient */
+  --surface-hover: rgba(168, 121, 50, 0.06);
+  --overlay: rgba(43, 38, 30, 0.44);
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --tap: 44px;
+  --max-w: 44rem;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, monospace;
+  --shadow: 0 1px 2px rgba(43, 38, 30, 0.06), 0 6px 18px rgba(43, 38, 30, 0.07);
+  --view-duration: 180ms;
+}
+```
+```css
+:root {
+    color-scheme: light;
+  }
+```
+
+## Part 2 — Raw source dumps
+```css
 /* Shift Cockpit — Calm Hotel Ledger, mobile-first */
 
 :root {
@@ -58,64 +128,7 @@
   --view-duration: 180ms;
 }
 
-/* Dark mode */
-[data-theme='dark'] {
-  color-scheme: dark;
-
-  --bg: #1a1714;
-  --bg-elevated: #211e1a;
-  --bg-panel: #282420;
-  --bg-input: #282420;
-  --border: #3d3730;
-  --border-strong: #5c5348;
-
-  --text: #e8e3d8;
-  --text-muted: #b0a594;
-  --text-faint: #807766;
-
-  --accent: #d4a849;
-  --accent-hover: #c09838;
-  --accent-dim: rgba(212, 168, 73, 0.16);
-  --accent-line: rgba(212, 168, 73, 0.35);
-  --accent-text: #d4a849;
-  --accent-strong: #b88f30;
-  --accent-strong-hover: #9e7a28;
-  --on-accent: #1a1714;
-
-  --success: #5cae70;
-  --success-dim: rgba(92, 174, 112, 0.14);
-  --success-line: rgba(92, 174, 112, 0.30);
-  --danger: #d0766a;
-  --danger-dim: rgba(208, 118, 106, 0.13);
-  --danger-line: rgba(208, 118, 106, 0.32);
-  --focus: #d4a849;
-
-  --surface-hover: rgba(212, 168, 73, 0.08);
-  --overlay: rgba(10, 8, 6, 0.6);
-
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.25);
-}
-
-[data-theme='dark'] body {
-  background-color: var(--bg);
-  background-image: linear-gradient(180deg, #1f1c17 0%, var(--bg) 22rem);
-}
-
-[data-theme='dark'] .skeleton-bar {
-  background: linear-gradient(90deg, var(--border) 0%, var(--bg-elevated) 45%, var(--border) 90%);
-}
-
-[data-theme='dark'] .app-header {
-  background: var(--bg-elevated);
-}
-
-@supports (background: color-mix(in srgb, red 50%, transparent)) {
-  @supports (backdrop-filter: blur(8px)) {
-    [data-theme='dark'] .app-header {
-      background: color-mix(in srgb, var(--bg-elevated) 90%, transparent);
-    }
-  }
-}
+/* Compact density (settings.compactUi → data-compact) */
 html[data-compact='true'],
 .app-shell.is-compact {
   --space-2: 0.35rem;
@@ -613,12 +626,6 @@ button {
 }
 
 /* CSS-only empty illustrations (no image deps) */
-.empty-illo-img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 12px;
-}
 .empty-illo {
   width: 4.5rem;
   height: 4.5rem;
@@ -2556,3 +2563,5 @@ button {
   white-space: nowrap;
   border: 0;
 }
+
+```
