@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Shift Cockpit">
+  <rect width="512" height="512" rx="96" fill="#0f1210"/>
+  <rect x="96" y="96" width="320" height="320" rx="48" fill="#1c221e" stroke="#c4a35a" stroke-width="16"/>
+  <rect x="160" y="176" width="48" height="48" rx="8" fill="#c4a35a"/>
+  <rect x="232" y="176" width="120" height="20" rx="6" fill="#9aa396"/>
+  <rect x="232" y="212" width="88" height="12" rx="4" fill="#6b7468"/>
+  <rect x="160" y="256" width="48" height="48" rx="8" fill="#c4a35a" opacity="0.85"/>
+  <rect x="232" y="256" width="120" height="20" rx="6" fill="#9aa396"/>
+  <rect x="232" y="292" width="88" height="12" rx="4" fill="#6b7468"/>
+  <rect x="160" y="336" width="48" height="48" rx="8" fill="#3d4a40"/>
+  <rect x="232" y="336" width="120" height="20" rx="6" fill="#6b7468"/>
+  <rect x="232" y="372" width="64" height="12" rx="4" fill="#3d4a40"/>
+</svg>
