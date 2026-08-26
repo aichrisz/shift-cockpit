@@ -36,7 +36,7 @@ function EmptyIllustration({ kind }: { kind: EmptyKind }) {
   return (
     <div className="empty-illo empty-illo-none" aria-hidden="true">
       <img
-        src="/empty-state.png"
+        src={`${import.meta.env.BASE_URL}empty-state.png`}
         alt=""
         className="empty-illo-img"
         width={210}

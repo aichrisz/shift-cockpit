@@ -17,7 +17,8 @@ export interface ConfirmDialogProps {
 }
 
 /**
- * Lightweight in-app confirm. Focuses confirm on open; Escape cancels.
+ * Lightweight in-app confirm. Focuses confirm on open (cancel for
+ * destructive, so Enter cannot confirm); Escape cancels.
  * No portal deps — fixed overlay in the tree.
  */
 export function ConfirmDialog({
@@ -39,10 +40,11 @@ export function ConfirmDialog({
   useEffect(() => {
     if (!open) return
     const tId = window.setTimeout(() => {
-      confirmRef.current?.focus()
+      // Destructive: land on CANCEL so a stray Enter never confirms
+      ;(destructive ? cancelRef.current : confirmRef.current)?.focus()
     }, 0)
     return () => window.clearTimeout(tId)
-  }, [open])
+  }, [open, destructive])
 
   useEffect(() => {
     if (!open) return

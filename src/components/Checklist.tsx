@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import type { ChecklistItem, Lang } from '../types'
 import { t } from '../i18n'
 import { createId } from '../lib/id'
@@ -14,6 +14,7 @@ interface ChecklistProps {
 export function Checklist({ lang, items, onChange, onCopy }: ChecklistProps) {
   const [draft, setDraft] = useState('')
   const [resetOpen, setResetOpen] = useState(false)
+  const headingId = useId()
 
   function toggle(id: string) {
     onChange(items.map((item) => (item.id === id ? { ...item, done: !item.done } : item)))
@@ -35,11 +36,14 @@ export function Checklist({ lang, items, onChange, onCopy }: ChecklistProps) {
     setResetOpen(false)
   }
 
-  const done = items.filter((i) => i.done).length
-  const canReset = items.length > 0 && done > 0
+  // ponytail: hide legacy blank-label rows without mutating saved data;
+  // upgrade path: one-time migration in storage layer
+  const visible = items.filter((item) => item.label.trim() !== '')
+  const done = visible.filter((i) => i.done).length
+  const canReset = visible.length > 0 && done > 0
 
   return (
-    <section className="panel" aria-labelledby="checklist-heading">
+    <section className="panel" aria-labelledby={headingId}>
       <ConfirmDialog
         lang={lang}
         open={resetOpen}
@@ -52,7 +56,7 @@ export function Checklist({ lang, items, onChange, onCopy }: ChecklistProps) {
       />
 
       <div className="panel-head">
-        <h2 id="checklist-heading" className="panel-title">
+        <h2 id={headingId} className="panel-title">
           {t(lang, 'checklist')}
         </h2>
         <div className="panel-head-actions">
@@ -74,14 +78,14 @@ export function Checklist({ lang, items, onChange, onCopy }: ChecklistProps) {
               {t(lang, 'resetChecks')}
             </button>
           )}
-          <span className="panel-meta">
-            {done}/{items.length} {t(lang, 'doneCount')}
+          <span className="panel-meta" aria-live="polite">
+            {done}/{visible.length} {t(lang, 'doneCount')}
           </span>
         </div>
       </div>
 
       <ul className="checklist" role="list">
-        {items.map((item) => (
+        {visible.map((item) => (
           <li key={item.id} className="checklist-item">
             <label className="check-row">
               <input
@@ -94,7 +98,7 @@ export function Checklist({ lang, items, onChange, onCopy }: ChecklistProps) {
             <button
               type="button"
               className="btn-icon"
-              aria-label={t(lang, 'delete')}
+              aria-label={`${t(lang, 'delete')}: ${item.label}`}
               onClick={() => remove(item.id)}
             >
               ×
@@ -108,10 +112,11 @@ export function Checklist({ lang, items, onChange, onCopy }: ChecklistProps) {
           type="text"
           className="input"
           value={draft}
+          aria-label={t(lang, 'addCustom')}
           placeholder={t(lang, 'customPlaceholder')}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
               e.preventDefault()
               addCustom()
             }
